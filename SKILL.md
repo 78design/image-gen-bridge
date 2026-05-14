@@ -1,79 +1,142 @@
-# Image Generator Skill
+# image-gen-bridge
 
-AI图片生成技能，支持文生图和图生图（参考图模式）。
+AI图片生成工具，通过OpenAI兼容接口调用各类生图模型。
 
-## 安装
+支持文生图（Text-to-Image）和图生图（Image-to-Image），适用于各种OpenAI兼容的中转站/代理服务。
 
-### 1. 克隆仓库
+## Features
+
+- Text-to-Image generation
+- Image-to-Image generation (with reference image)
+- Compatible with any OpenAI-compatible API endpoint
+- Support for custom models (DALL-E, GPT-Image, Stable Diffusion, etc.)
+- Environment variable configuration
+- Automatic image URL extraction from markdown responses
+
+## Quick Start
+
+### 1. Clone
 
 ```bash
-git clone https://github.com/tianhui/image-generator-skill.git
-cd image-generator-skill
+git clone https://github.com/78design/image-gen-bridge.git
+cd image-gen-bridge
 ```
 
-### 2. 安装依赖
+### 2. Install
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. 配置API Key
+### 3. Configure
 
-**必须设置环境变量**，技能不包含任何内置API key：
+Set your API key and endpoint:
 
 ```bash
-export IMAGE_GEN_API_KEY="your-api-key-here"
+export IMAGE_GEN_API_KEY="your-api-key"
+export IMAGE_GEN_API_URL="https://your-proxy.com/v1"
+export IMAGE_GEN_MODEL="your-model-name"
 ```
 
-建议添加到 `~/.bashrc` 或 `~/.zshrc`：
+### 4. Generate
 
 ```bash
-echo 'export IMAGE_GEN_API_KEY="your-api-key"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-## 使用方法
-
-### 文生图
-
-```bash
+# Text-to-Image
 python generate.py --prompt "A cute cat sitting on a sofa" --output cat.png
+
+# Image-to-Image
+python generate.py --prompt "A stylish woman carrying this keychain" \
+  --image-file product.jpg \
+  --output fashion.png
 ```
 
-### 图生图（参考图模式）
+## Configuration
 
-```bash
-python generate.py --prompt "A stylish woman carrying this bag charm" \
-  --image-file reference.jpg \
-  --output output.png
-```
+### Environment Variables
 
-## 参数说明
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `IMAGE_GEN_API_KEY` | Yes | - | API key for authentication |
+| `IMAGE_GEN_API_URL` | No | `https://api.openai.com/v1` | API base URL |
+| `IMAGE_GEN_MODEL` | No | `gpt-image-1` | Default model name |
 
-| 参数 | 说明 | 必需 |
-|------|------|------|
-| `--prompt` | 图片描述文本 | ✅ |
-| `--image-file` | 参考图片路径（图生图模式） | ❌ |
-| `--output` | 输出图片路径 | ❌ |
+### Command Line Arguments
 
-## 使用场景示例
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `--prompt` | Yes | Text prompt for image generation |
+| `--image-file` | No | Path to reference image (image-to-image) |
+| `--output` | No | Output file path |
+| `--api-url` | No | API base URL (overrides env) |
+| `--api-key` | No | API key (overrides env) |
+| `--model` | No | Model name (overrides env) |
 
-### 电商产品穿搭图
+Command line arguments take priority over environment variables.
+
+## Usage Examples
+
+### Basic Text-to-Image
 
 ```bash
 python generate.py \
-  --prompt "A stylish 22-year-old Chinese woman with long wavy hair, wearing a white cropped t-shirt and high-waisted jeans, carrying a black crossbody bag with a pink plush keychain hanging from it. Walking on a trendy city street, fashion editorial photography style" \
-  --image-file product.jpg \
+  --prompt "A beautiful sunset over the ocean" \
+  --output sunset.png
+```
+
+### Image-to-Image with Reference
+
+```bash
+python generate.py \
+  --prompt "A 22-year-old woman wearing a white crop top and jeans, carrying a bag with this plush keychain attached. Street fashion photography" \
+  --image-file ./product_photo.jpg \
   --output fashion_shot.png
 ```
 
-## 注意事项
+### Using Different API Providers
 
-- API key必须自行申请（1openapi平台）
-- 图片生成可能需要10-30秒，请耐心等待
-- 参考图模式会保持产品特征一致性
+```bash
+# Provider A
+python generate.py \
+  --prompt "A fantasy castle" \
+  --api-url "https://provider-a.com/v1" \
+  --model "dall-e-3" \
+  --output castle.png
 
-## 依赖
+# Provider B
+python generate.py \
+  --prompt "A cyberpunk city" \
+  --api-url "https://provider-b.com/v1" \
+  --model "stable-diffusion-xl" \
+  --output cyberpunk.png
+```
+
+### One-liner with Environment Variables
+
+```bash
+IMAGE_GEN_API_KEY="sk-xxx" \
+IMAGE_GEN_API_URL="https://your-proxy.com/v1" \
+IMAGE_GEN_MODEL="gpt-image-2" \
+python generate.py --prompt "A cute dog" --output dog.png
+```
+
+## Installation Script
+
+Run the included install script for quick setup:
+
+```bash
+bash install.sh
+```
+
+This will:
+1. Install Python dependencies
+2. Guide you through API configuration
+3. Verify the installation
+
+## Requirements
 
 - Python 3.7+
 - requests >= 2.31.0
+
+## License
+
+MIT
