@@ -6,7 +6,6 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SHELL_RC=""
 
-# Detect shell config file
 if [ -n "$ZSH_VERSION" ]; then
     SHELL_RC="$HOME/.zshrc"
 elif [ -n "$BASH_VERSION" ]; then
@@ -21,10 +20,8 @@ echo "  image-gen-bridge - Installer"
 echo "========================================="
 echo ""
 
-# Step 1: Install dependencies
 echo "[1/3] Installing Python dependencies..."
 
-# Detect virtual environment to avoid --break-system-packages warnings
 if [ -n "$VIRTUAL_ENV" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ]; then
     pip install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null || {
         echo "Error: Failed to install dependencies."
@@ -41,71 +38,90 @@ fi
 echo "   Done."
 echo ""
 
-# Step 2: Configure API
 echo "[2/3] API Configuration"
-echo "------------------------"
+echo "-----------------------------------------"
 
-# Check if already configured
-if [ -n "$IMAGE_GEN_API_KEY" ]; then
-    echo "   IMAGE_GEN_API_KEY: already set"
-else
-    echo "   Enter your API key:"
-    read -r -s API_KEY_INPUT
+declare -A PROVIDERS
+PROVIDERS[1]="1OpenAPI|https://api.1openapi.com/v1|openai/gpt-image-2"
+PROVIDERS[2]="Custom API|custom|custom"
+
+declare -A MODELS_1OPENAPI
+MODELS_1OPENAPI[1]="openai/gpt-image-2"
+MODELS_1OPENAPI[2]="google/gemini-3.1-flash-image-preview"
+
+echo "Select API Provider:"
+echo "  1) 1OpenAPI (推荐)"
+echo "  2) Custom API"
+echo ""
+read -p "Enter choice (1-2) [1]: " PROVIDER_CHOICE
+PROVIDER_CHOICE=${PROVIDER_CHOICE:-1}
+
+IFS='|' read -r SELECTED_NAME SELECTED_URL SELECTED_MODEL <<< "${PROVIDERS[$PROVIDER_CHOICE]}"
+
+if [ "$SELECTED_URL" = "custom" ]; then
     echo ""
-    if [ -n "$API_KEY_INPUT" ]; then
-        if ! grep -q "IMAGE_GEN_API_KEY" "$SHELL_RC" 2>/dev/null; then
-            echo "export IMAGE_GEN_API_KEY=\"$API_KEY_INPUT\"" >> "$SHELL_RC"
-            export IMAGE_GEN_API_KEY="$API_KEY_INPUT"
-            echo "   IMAGE_GEN_API_KEY: saved to $SHELL_RC"
-        else
-            echo "   IMAGE_GEN_API_KEY: already exists in $SHELL_RC, skipping"
-        fi
-    else
-        echo "   Skipped (you can set it later)"
+    echo "Enter your custom API base URL:"
+    read -r SELECTED_URL
+    SELECTED_URL="${SELECTED_URL%/}"
+    if [ ! -n "$SELECTED_URL" ]; then
+        echo "Error: API URL is required"
+        exit 1
     fi
-fi
-
-if [ -n "$IMAGE_GEN_API_URL" ]; then
-    echo "   IMAGE_GEN_API_URL: $IMAGE_GEN_API_URL"
-else
+    
     echo ""
-    echo "   Enter your API base URL (press Enter for default: https://api.openai.com/v1):"
-    read -r API_URL_INPUT
-    if [ -n "$API_URL_INPUT" ]; then
-        if ! grep -q "IMAGE_GEN_API_URL" "$SHELL_RC" 2>/dev/null; then
-            echo "export IMAGE_GEN_API_URL=\"$API_URL_INPUT\"" >> "$SHELL_RC"
-            export IMAGE_GEN_API_URL="$API_URL_INPUT"
-            echo "   IMAGE_GEN_API_URL: saved to $SHELL_RC"
-        else
-            echo "   IMAGE_GEN_API_URL: already exists in $SHELL_RC, skipping"
-        fi
-    else
-        echo "   Using default: https://api.openai.com/v1"
+    echo "Enter model name:"
+    read -r SELECTED_MODEL
+    if [ ! -n "$SELECTED_MODEL" ]; then
+        echo "Error: Model name is required"
+        exit 1
     fi
-fi
-
-if [ -n "$IMAGE_GEN_MODEL" ]; then
-    echo "   IMAGE_GEN_MODEL: $IMAGE_GEN_MODEL"
+    SELECTED_NAME="Custom"
 else
     echo ""
-    echo "   Enter default model name (press Enter for default: gpt-image-1):"
-    read -r MODEL_INPUT
-    if [ -n "$MODEL_INPUT" ]; then
-        if ! grep -q "IMAGE_GEN_MODEL" "$SHELL_RC" 2>/dev/null; then
-            echo "export IMAGE_GEN_MODEL=\"$MODEL_INPUT\"" >> "$SHELL_RC"
-            export IMAGE_GEN_MODEL="$MODEL_INPUT"
-            echo "   IMAGE_GEN_MODEL: saved to $SHELL_RC"
-        else
-            echo "   IMAGE_GEN_MODEL: already exists in $SHELL_RC, skipping"
-        fi
-    else
-        echo "   Using default: gpt-image-1"
-    fi
+    echo "Selected: $SELECTED_NAME"
+    echo ""
+    echo "Select Model:"
+    echo "  1) openai/gpt-image-2"
+    echo "  2) google/gemini-3.1-flash-image-preview"
+    echo ""
+    read -p "Enter choice (1-2) [1]: " MODEL_CHOICE
+    MODEL_CHOICE=${MODEL_CHOICE:-1}
+    SELECTED_MODEL="${MODELS_1OPENAPI[$MODEL_CHOICE]}"
 fi
 
 echo ""
+echo "Configuration Summary:"
+echo "  Provider: $SELECTED_NAME"
+echo "  API URL:  $SELECTED_URL"
+echo "  Model:    $SELECTED_MODEL"
+echo ""
 
-# Step 3: Verify
+echo "Enter your API Key:"
+read -r -s API_KEY_INPUT
+echo ""
+
+if [ ! -n "$API_KEY_INPUT" ]; then
+    echo "Error: API Key is required"
+    exit 1
+fi
+
+save_config() {
+    local var="$1"
+    local value="$2"
+    if ! grep -q "$var" "$SHELL_RC" 2>/dev/null; then
+        echo "export $var=\"$value\"" >> "$SHELL_RC"
+    fi
+}
+
+save_config "IMAGE_GEN_API_KEY" "$API_KEY_INPUT"
+save_config "IMAGE_GEN_API_URL" "$SELECTED_URL"
+save_config "IMAGE_GEN_MODEL" "$SELECTED_MODEL"
+
+echo "   API Key: saved to $SHELL_RC"
+echo "   API URL: saved to $SHELL_RC"
+echo "   Model: saved to $SHELL_RC"
+echo ""
+
 echo "[3/3] Verifying installation..."
 python3 "$SCRIPT_DIR/generate.py" --help > /dev/null 2>&1 && \
     echo "   Script: OK" || \
@@ -120,11 +136,8 @@ echo "========================================="
 echo "  Installation complete!"
 echo "========================================="
 echo ""
-echo "Usage:"
-echo "  python generate.py --prompt \"your prompt\" --output image.png"
-echo ""
-echo "With reference image:"
-echo "  python generate.py --prompt \"your prompt\" --image-file ref.jpg --output image.png"
-echo ""
-echo "Config file: $SHELL_RC"
+echo "Next steps:"
+echo "  1. Restart your terminal or run: source $SHELL_RC"
+echo "  2. Generate your first image:"
+echo "     python $SCRIPT_DIR/generate.py --prompt \"A cute cat\" --output cat.png"
 echo ""

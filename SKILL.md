@@ -1,142 +1,87 @@
+---
+name: image-gen-bridge
+description: AI图片生成工具，通过OpenAI兼容接口调用各类生图模型，支持文生图和图生图
+---
+
 # image-gen-bridge
 
-AI图片生成工具，通过OpenAI兼容接口调用各类生图模型。
+当用户需要生成图片时使用此技能。支持文生图（Text-to-Image）和图生图（Image-to-Image）。
 
-支持文生图（Text-to-Image）和图生图（Image-to-Image），适用于各种OpenAI兼容的中转站/代理服务。
+## When to use
 
-## Features
+- 当用户要求生成图片时
+- 当用户提到 DALL-E、Stable Diffusion、FLUX 等图像生成关键词时
+- 当用户需要生成产品图、设计图、概念图等
 
-- Text-to-Image generation
-- Image-to-Image generation (with reference image)
-- Compatible with any OpenAI-compatible API endpoint
-- Support for custom models (DALL-E, GPT-Image, Stable Diffusion, etc.)
-- Environment variable configuration
-- Automatic image URL extraction from markdown responses
+## 内置 API Provider
 
-## Quick Start
+安装时会提供以下内置选项供选择：
 
-### 1. Clone
+| Provider | API URL | 支持模型 |
+|----------|---------|----------|
+| 1OpenAPI | api.1openapi.com/v1 | openai/gpt-image-2, google/gemini-3.1-flash-image-preview |
+| Custom | 用户自定义 | 用户自定义 |
 
+## Instructions
+
+### 1. 安装配置
+
+让用户运行安装脚本：
 ```bash
-git clone https://github.com/78design/image-gen-bridge.git
-cd image-gen-bridge
-```
-
-### 2. Install
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Configure
-
-Set your API key and endpoint:
-
-```bash
-export IMAGE_GEN_API_KEY="your-api-key"
-export IMAGE_GEN_API_URL="https://your-proxy.com/v1"
-export IMAGE_GEN_MODEL="your-model-name"
-```
-
-### 4. Generate
-
-```bash
-# Text-to-Image
-python generate.py --prompt "A cute cat sitting on a sofa" --output cat.png
-
-# Image-to-Image
-python generate.py --prompt "A stylish woman carrying this keychain" \
-  --image-file product.jpg \
-  --output fashion.png
-```
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `IMAGE_GEN_API_KEY` | Yes | - | API key for authentication |
-| `IMAGE_GEN_API_URL` | No | `https://api.openai.com/v1` | API base URL |
-| `IMAGE_GEN_MODEL` | No | `gpt-image-1` | Default model name |
-
-### Command Line Arguments
-
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `--prompt` | Yes | Text prompt for image generation |
-| `--image-file` | No | Path to reference image (image-to-image) |
-| `--output` | No | Output file path |
-| `--api-url` | No | API base URL (overrides env) |
-| `--api-key` | No | API key (overrides env) |
-| `--model` | No | Model name (overrides env) |
-
-Command line arguments take priority over environment variables.
-
-## Usage Examples
-
-### Basic Text-to-Image
-
-```bash
-python generate.py \
-  --prompt "A beautiful sunset over the ocean" \
-  --output sunset.png
-```
-
-### Image-to-Image with Reference
-
-```bash
-python generate.py \
-  --prompt "A 22-year-old woman wearing a white crop top and jeans, carrying a bag with this plush keychain attached. Street fashion photography" \
-  --image-file ./product_photo.jpg \
-  --output fashion_shot.png
-```
-
-### Using Different API Providers
-
-```bash
-# Provider A
-python generate.py \
-  --prompt "A fantasy castle" \
-  --api-url "https://provider-a.com/v1" \
-  --model "dall-e-3" \
-  --output castle.png
-
-# Provider B
-python generate.py \
-  --prompt "A cyberpunk city" \
-  --api-url "https://provider-b.com/v1" \
-  --model "stable-diffusion-xl" \
-  --output cyberpunk.png
-```
-
-### One-liner with Environment Variables
-
-```bash
-IMAGE_GEN_API_KEY="sk-xxx" \
-IMAGE_GEN_API_URL="https://your-proxy.com/v1" \
-IMAGE_GEN_MODEL="gpt-image-2" \
-python generate.py --prompt "A cute dog" --output dog.png
-```
-
-## Installation Script
-
-Run the included install script for quick setup:
-
-```bash
+cd skills/image-gen-bridge
 bash install.sh
 ```
 
-This will:
-1. Install Python dependencies
-2. Guide you through API configuration
-3. Verify the installation
+安装过程会引导用户：
+1. 选择 API Provider（输入 1-2）
+2. 选择具体模型
+3. 输入 API Key
 
-## Requirements
+### 2. 生成图片
 
-- Python 3.7+
-- requests >= 2.31.0
+**文生图模式 (Text-to-Image):**
+```bash
+python skills/image-gen-bridge/generate.py --prompt "用户描述" --output 文件名.png
+```
 
-## License
+**图生图模式 (Image-to-Image):**
+```bash
+python skills/image-gen-bridge/generate.py --prompt "用户描述" --image-file 参考图.png --output 结果.png
+```
 
-MIT
+### 3. 常用参数
+
+| 参数 | 必需 | 说明 |
+|------|------|------|
+| `--prompt` | ✅ | 图片描述 |
+| `--image-file` | ❌ | 参考图片路径（图生图模式） |
+| `--output` | ❌ | 输出文件路径 |
+| `--api-url` | ❌ | 覆盖 API 地址 |
+| `--api-key` | ❌ | 覆盖 API Key |
+| `--model` | ❌ | 覆盖模型名称 |
+
+## Command Reference
+
+```
+python generate.py [OPTIONS]
+
+Required:
+  --prompt TEXT          Text prompt for image generation
+
+Optional:
+  --image-file PATH      Reference image for image-to-image mode
+  --output PATH          Output file path
+  --api-url TEXT         API base URL (overrides env)
+  --api-key TEXT         API key (overrides env)
+  --model TEXT           Model name (overrides env)
+  --help                 Show help
+```
+
+## 环境变量
+
+如需手动配置：
+```bash
+export IMAGE_GEN_API_KEY="你的API密钥"
+export IMAGE_GEN_API_URL="https://api.1openapi.com/v1"
+export IMAGE_GEN_MODEL="openai/gpt-image-2"
+```
