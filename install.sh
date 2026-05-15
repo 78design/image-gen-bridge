@@ -23,12 +23,21 @@ echo ""
 
 # Step 1: Install dependencies
 echo "[1/3] Installing Python dependencies..."
-pip install -r "$SCRIPT_DIR/requirements.txt" --break-system-packages 2>/dev/null || \
-pip install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null || {
-    echo "Error: Failed to install dependencies."
-    echo "Please run manually: pip install -r requirements.txt"
-    exit 1
-}
+
+# Detect virtual environment to avoid --break-system-packages warnings
+if [ -n "$VIRTUAL_ENV" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ]; then
+    pip install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null || {
+        echo "Error: Failed to install dependencies."
+        echo "Please run manually: pip install -r requirements.txt"
+        exit 1
+    }
+else
+    pip install -r "$SCRIPT_DIR/requirements.txt" --break-system-packages 2>/dev/null || {
+        echo "Error: Failed to install dependencies."
+        echo "Please run manually: pip install -r requirements.txt"
+        exit 1
+    }
+fi
 echo "   Done."
 echo ""
 
@@ -44,9 +53,13 @@ else
     read -r -s API_KEY_INPUT
     echo ""
     if [ -n "$API_KEY_INPUT" ]; then
-        echo "export IMAGE_GEN_API_KEY=\"$API_KEY_INPUT\"" >> "$SHELL_RC"
-        export IMAGE_GEN_API_KEY="$API_KEY_INPUT"
-        echo "   IMAGE_GEN_API_KEY: saved to $SHELL_RC"
+        if ! grep -q "IMAGE_GEN_API_KEY" "$SHELL_RC" 2>/dev/null; then
+            echo "export IMAGE_GEN_API_KEY=\"$API_KEY_INPUT\"" >> "$SHELL_RC"
+            export IMAGE_GEN_API_KEY="$API_KEY_INPUT"
+            echo "   IMAGE_GEN_API_KEY: saved to $SHELL_RC"
+        else
+            echo "   IMAGE_GEN_API_KEY: already exists in $SHELL_RC, skipping"
+        fi
     else
         echo "   Skipped (you can set it later)"
     fi
@@ -59,9 +72,13 @@ else
     echo "   Enter your API base URL (press Enter for default: https://api.openai.com/v1):"
     read -r API_URL_INPUT
     if [ -n "$API_URL_INPUT" ]; then
-        echo "export IMAGE_GEN_API_URL=\"$API_URL_INPUT\"" >> "$SHELL_RC"
-        export IMAGE_GEN_API_URL="$API_URL_INPUT"
-        echo "   IMAGE_GEN_API_URL: saved to $SHELL_RC"
+        if ! grep -q "IMAGE_GEN_API_URL" "$SHELL_RC" 2>/dev/null; then
+            echo "export IMAGE_GEN_API_URL=\"$API_URL_INPUT\"" >> "$SHELL_RC"
+            export IMAGE_GEN_API_URL="$API_URL_INPUT"
+            echo "   IMAGE_GEN_API_URL: saved to $SHELL_RC"
+        else
+            echo "   IMAGE_GEN_API_URL: already exists in $SHELL_RC, skipping"
+        fi
     else
         echo "   Using default: https://api.openai.com/v1"
     fi
@@ -74,9 +91,13 @@ else
     echo "   Enter default model name (press Enter for default: gpt-image-1):"
     read -r MODEL_INPUT
     if [ -n "$MODEL_INPUT" ]; then
-        echo "export IMAGE_GEN_MODEL=\"$MODEL_INPUT\"" >> "$SHELL_RC"
-        export IMAGE_GEN_MODEL="$MODEL_INPUT"
-        echo "   IMAGE_GEN_MODEL: saved to $SHELL_RC"
+        if ! grep -q "IMAGE_GEN_MODEL" "$SHELL_RC" 2>/dev/null; then
+            echo "export IMAGE_GEN_MODEL=\"$MODEL_INPUT\"" >> "$SHELL_RC"
+            export IMAGE_GEN_MODEL="$MODEL_INPUT"
+            echo "   IMAGE_GEN_MODEL: saved to $SHELL_RC"
+        else
+            echo "   IMAGE_GEN_MODEL: already exists in $SHELL_RC, skipping"
+        fi
     else
         echo "   Using default: gpt-image-1"
     fi

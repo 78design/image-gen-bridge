@@ -73,18 +73,22 @@ def generate_image(prompt, api_url, api_key, model, image_file=None, output_path
     })
 
     # Add reference image if provided
-    if image_file and os.path.exists(image_file):
-        print(f"   Mode: Image-to-Image (ref: {image_file})")
-        image_base64 = encode_image_to_base64(image_file)
-        image_ext = Path(image_file).suffix.lower()
-        mime_type = "image/jpeg" if image_ext in [".jpg", ".jpeg"] else "image/png"
+    if image_file:
+        if os.path.exists(image_file):
+            print(f"   Mode: Image-to-Image (ref: {image_file})")
+            image_base64 = encode_image_to_base64(image_file)
+            image_ext = Path(image_file).suffix.lower()
+            mime_type = "image/jpeg" if image_ext in [".jpg", ".jpeg"] else "image/png"
 
-        messages[0]["content"].append({
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:{mime_type};base64,{image_base64}"
-            }
-        })
+            messages[0]["content"].append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:{mime_type};base64,{image_base64}"
+                }
+            })
+        else:
+            print(f"   Warning: Image file not found: {image_file}")
+            print("   Falling back to text-to-image mode.")
     else:
         print("   Mode: Text-to-Image")
 
