@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "image-gen-bridge": {
+      "source": "78design/image-gen-bridge",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "b513fc0bc0e8b4068cc632a1c879673c5da16d2d951b4278c1a2c4829cf72f71"
+    }
+  }
+}
