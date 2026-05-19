@@ -1,8 +1,19 @@
+---
+name: image-gen-bridge
+description: AI图片生成工具，通过OpenAI兼容接口调用各类生图模型，支持文生图和图生图
+---
+
 # image-gen-bridge
 
 AI图片生成工具，通过OpenAI兼容接口调用各类生图模型。
 
 支持文生图（Text-to-Image）和图生图（Image-to-Image），适用于各种OpenAI兼容的中转站/代理服务。
+
+## When to use
+
+- 当用户要求生成图片时
+- 当用户提到 DALL-E、Stable Diffusion、FLUX 等图像生成关键词时
+- 当用户需要生成产品图、设计图、概念图等
 
 ## Features
 
