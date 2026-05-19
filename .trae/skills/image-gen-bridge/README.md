@@ -27,8 +27,11 @@ bash install.sh
 # 文生图
 python skills/image-gen-bridge/generate.py --prompt "一只可爱的猫咪" --output cat.png
 
-# 图生图（参考图）
+# 图生图（单张参考图）
 python skills/image-gen-bridge/generate.py --prompt "把这只猫放在沙发上" --image-file cat.png --output cat_on_sofa.png
+
+# 图生图（多张参考图）
+python skills/image-gen-bridge/generate.py --prompt "结合两张参考图的风格" --image-file style1.png --image-file style2.png --output result.png
 ```
 
 ## ⚙️ 内置 API Provider

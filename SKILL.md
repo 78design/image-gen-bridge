@@ -7,7 +7,7 @@ AI图片生成工具，通过OpenAI兼容接口调用各类生图模型。
 ## Features
 
 - Text-to-Image generation
-- Image-to-Image generation (with reference image)
+- Image-to-Image generation (with one or multiple reference images)
 - Compatible with any OpenAI-compatible API endpoint
 - Support for custom models (DALL-E, GPT-Image, Stable Diffusion, etc.)
 - Environment variable configuration
@@ -44,10 +44,15 @@ export IMAGE_GEN_MODEL="your-model-name"
 # Text-to-Image
 python generate.py --prompt "A cute cat sitting on a sofa" --output cat.png
 
-# Image-to-Image
+# Image-to-Image (single reference)
 python generate.py --prompt "A stylish woman carrying this keychain" \
   --image-file product.jpg \
   --output fashion.png
+
+# Image-to-Image (multiple references)
+python generate.py --prompt "Combine the style of these two images" \
+  --image-file style1.jpg --image-file style2.jpg \
+  --output combined.png
 ```
 
 ## Configuration
@@ -65,7 +70,7 @@ python generate.py --prompt "A stylish woman carrying this keychain" \
 | Argument | Required | Description |
 |----------|----------|-------------|
 | `--prompt` | Yes | Text prompt for image generation |
-| `--image-file` | No | Path to reference image (image-to-image) |
+| `--image-file` | No | Path to reference image(s) (image-to-image, multiple allowed) |
 | `--output` | No | Output file path |
 | `--api-url` | No | API base URL (overrides env) |
 | `--api-key` | No | API key (overrides env) |
@@ -83,13 +88,22 @@ python generate.py \
   --output sunset.png
 ```
 
-### Image-to-Image with Reference
+### Image-to-Image with Single Reference
 
 ```bash
 python generate.py \
   --prompt "A 22-year-old woman wearing a white crop top and jeans, carrying a bag with this plush keychain attached. Street fashion photography" \
   --image-file ./product_photo.jpg \
   --output fashion_shot.png
+```
+
+### Image-to-Image with Multiple References
+
+```bash
+python generate.py \
+  --prompt "Create a product photo combining the lighting from photo1 and the composition from photo2" \
+  --image-file ./photo1.jpg --image-file ./photo2.jpg \
+  --output combined_product.png
 ```
 
 ### Using Different API Providers

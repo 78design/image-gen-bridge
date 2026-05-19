@@ -49,7 +49,7 @@ def extract_image_url_from_markdown(content):
     return None
 
 
-def generate_image(prompt, api_url, api_key, model, image_file=None, output_path=None):
+def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None):
     """Generate image using OpenAI-compatible API."""
 
     # Ensure api_url ends with /chat/completions
@@ -72,22 +72,30 @@ def generate_image(prompt, api_url, api_key, model, image_file=None, output_path
         "text": prompt
     })
 
-    # Add reference image if provided
-    if image_file:
-        if os.path.exists(image_file):
-            print(f"   Mode: Image-to-Image (ref: {image_file})")
-            image_base64 = encode_image_to_base64(image_file)
-            image_ext = Path(image_file).suffix.lower()
-            mime_type = "image/jpeg" if image_ext in [".jpg", ".jpeg"] else "image/png"
+    # Add reference images if provided
+    if image_files and len(image_files) > 0:
+        valid_images = []
+        for image_file in image_files:
+            if os.path.exists(image_file):
+                valid_images.append(image_file)
+            else:
+                print(f"   Warning: Image file not found: {image_file}")
+        
+        if valid_images:
+            print(f"   Mode: Image-to-Image (refs: {', '.join(valid_images)})")
+            for image_file in valid_images:
+                image_base64 = encode_image_to_base64(image_file)
+                image_ext = Path(image_file).suffix.lower()
+                mime_type = "image/jpeg" if image_ext in [".jpg", ".jpeg"] else "image/png"
 
-            messages[0]["content"].append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:{mime_type};base64,{image_base64}"
-                }
-            })
+                messages[0]["content"].append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{mime_type};base64,{image_base64}"
+                    }
+                })
         else:
-            print(f"   Warning: Image file not found: {image_file}")
+            print("   Warning: No valid reference images found")
             print("   Falling back to text-to-image mode.")
     else:
         print("   Mode: Text-to-Image")
@@ -154,9 +162,13 @@ Examples:
   # Text-to-Image
   python generate.py --prompt "A cute cat" --output cat.png
 
-  # Image-to-Image (with reference)
+  # Image-to-Image (with single reference)
   python generate.py --prompt "A woman wearing this keychain" \\
     --image-file product.jpg --output fashion.png
+
+  # Image-to-Image (with multiple references)
+  python generate.py --prompt "Combine the style of both images" \\
+    --image-file style1.jpg --image-file style2.jpg --output combined.png
 
   # Custom API endpoint and model
   python generate.py --prompt "A sunset landscape" \\
@@ -172,7 +184,7 @@ Environment Variables:
     )
 
     parser.add_argument("--prompt", required=True, help="Text prompt for image generation")
-    parser.add_argument("--image-file", help="Path to reference image (image-to-image mode)")
+    parser.add_argument("--image-file", action="append", help="Path to reference image (image-to-image mode, multiple allowed)")
     parser.add_argument("--output", help="Output file path")
     parser.add_argument("--api-url", help="API base URL (or set IMAGE_GEN_API_URL)")
     parser.add_argument("--api-key", help="API key (or set IMAGE_GEN_API_KEY)")
@@ -196,7 +208,7 @@ Environment Variables:
         api_url=api_url,
         api_key=api_key,
         model=model,
-        image_file=args.image_file,
+        image_files=args.image_file,
         output_path=args.output
     )
 

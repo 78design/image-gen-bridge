@@ -5,7 +5,7 @@ description: AI图片生成工具，通过OpenAI兼容接口调用各类生图�
 
 # image-gen-bridge
 
-当用户需要生成图片时使用此技能。支持文生图（Text-to-Image）和图生图（Image-to-Image）。
+当用户需要生成图片时使用此技能。支持文生图（Text-to-Image）和图生图（Image-to-Image，支持单张或多张参考图）。
 
 ## When to use
 
@@ -44,9 +44,14 @@ bash install.sh
 python skills/image-gen-bridge/generate.py --prompt "用户描述" --output 文件名.png
 ```
 
-**图生图模式 (Image-to-Image):**
+**图生图模式 (Image-to-Image) - 单张参考：
 ```bash
 python skills/image-gen-bridge/generate.py --prompt "用户描述" --image-file 参考图.png --output 结果.png
+```
+
+**图生图模式 (Image-to-Image) - 多张参考：
+```bash
+python skills/image-gen-bridge/generate.py --prompt "用户描述" --image-file 参考图1.png --image-file 参考图2.png --output 结果.png
 ```
 
 ### 3. 常用参数
@@ -54,7 +59,7 @@ python skills/image-gen-bridge/generate.py --prompt "用户描述" --image-file 
 | 参数 | 必需 | 说明 |
 |------|------|------|
 | `--prompt` | ✅ | 图片描述 |
-| `--image-file` | ❌ | 参考图片路径（图生图模式） |
+| `--image-file` | ❌ | 参考图片路径（图生图模式，可多次使用以添加多张参考图） |
 | `--output` | ❌ | 输出文件路径 |
 | `--api-url` | ❌ | 覆盖 API 地址 |
 | `--api-key` | ❌ | 覆盖 API Key |
@@ -69,7 +74,7 @@ Required:
   --prompt TEXT          Text prompt for image generation
 
 Optional:
-  --image-file PATH      Reference image for image-to-image mode
+  --image-file PATH      Reference image for image-to-image mode (multiple allowed)
   --output PATH          Output file path
   --api-url TEXT         API base URL (overrides env)
   --api-key TEXT         API key (overrides env)
