@@ -74,7 +74,7 @@ python generate.py --prompt "Combine the style of these two images" \
 |----------|----------|---------|-------------|
 | `IMAGE_GEN_API_KEY` | Yes | - | API key for authentication |
 | `IMAGE_GEN_API_URL` | No | `https://api.openai.com/v1` | API base URL |
-| `IMAGE_GEN_MODEL` | No | `gpt-image-1` | Default model name |
+| `IMAGE_GEN_MODEL` | No | `openai/gpt-image-2` | Default model name |
 
 ### Command Line Arguments
 

@@ -195,7 +195,7 @@ Environment Variables:
     # Get config from args or environment variables
     api_key = args.api_key or os.environ.get("IMAGE_GEN_API_KEY")
     api_url = args.api_url or os.environ.get("IMAGE_GEN_API_URL", "https://api.openai.com/v1")
-    model = args.model or os.environ.get("IMAGE_GEN_MODEL", "gpt-image-1")
+    model = args.model or os.environ.get("IMAGE_GEN_MODEL", "openai/gpt-image-2")
 
     if not api_key:
         print("Error: API key is required.")

@@ -88,7 +88,7 @@ if [ -n "$IMAGE_GEN_MODEL" ]; then
     echo "   IMAGE_GEN_MODEL: $IMAGE_GEN_MODEL"
 else
     echo ""
-    echo "   Enter default model name (press Enter for default: gpt-image-1):"
+    echo "   Enter default model name (press Enter for default: openai/gpt-image-2):"
     read -r MODEL_INPUT
     if [ -n "$MODEL_INPUT" ]; then
         if ! grep -q "IMAGE_GEN_MODEL" "$SHELL_RC" 2>/dev/null; then
@@ -99,7 +99,7 @@ else
             echo "   IMAGE_GEN_MODEL: already exists in $SHELL_RC, skipping"
         fi
     else
-        echo "   Using default: gpt-image-1"
+        echo "   Using default: openai/gpt-image-2"
     fi
 fi
 
