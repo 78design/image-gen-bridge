@@ -139,8 +139,40 @@ bash install.sh
 1. 安装 Python 依赖（requests 库）
 2. 引导配置 API 密钥和参数
 3. 验证安装
+4. 测试 API 连接
+
+## 常见问题
+
+### Q: 安装后提示找不到命令？
+
+运行以下命令重新加载配置：
+```bash
+source ~/.bashrc  # 或 ~/.zshrc
+```
+
+### Q: 如何更新 API 配置？
+
+编辑 `~/.bashrc`（或 `~/.zshrc`），修改对应的 export 行：
+```bash
+export IMAGE_GEN_API_KEY="your-new-key"
+export IMAGE_GEN_API_URL="https://new-provider.com/v1"
+export IMAGE_GEN_MODEL="new-model"
+```
+
+### Q: 支持哪些图片格式？
+
+支持 `.jpg`、`.jpeg`、`.png` 格式作为参考图。
+
+### Q: API 请求超时怎么办？
+
+可以设置更长的超时时间，但建议检查网络连接和 API 服务状态。
+
+### Q: 如何查看详细错误信息？
+
+添加 `--verbose` 参数（如支持）或检查 API 返回的错误信息。
 
 ## 系统要求
 
 - Python 3.7+
 - requests >= 2.31.0
+- 网络连接（访问 API 服务）

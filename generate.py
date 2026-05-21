@@ -30,6 +30,11 @@ def encode_image_to_base64(image_path):
 def download_image(url, output_path):
     """Download image from URL and save to file."""
     try:
+        # Create output directory if it doesn't exist
+        output_dir = os.path.dirname(output_path)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir, exist_ok=True)
+
         response = requests.get(url, timeout=60)
         response.raise_for_status()
         with open(output_path, "wb") as f:
@@ -114,6 +119,12 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
         response.raise_for_status()
         result = response.json()
 
+        # Check if API returned an error
+        if "error" in result:
+            error_msg = result["error"].get("message", "Unknown error")
+            print(f"\n   API Error: {error_msg}")
+            return None
+
         if "choices" in result and len(result["choices"]) > 0:
             message = result["choices"][0].get("message", {})
             content = message.get("content", "")
@@ -137,6 +148,9 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                             base64_data = img_url.split(",")[1]
                             image_data = base64.b64decode(base64_data)
                             if output_path:
+                                output_dir = os.path.dirname(output_path)
+                                if output_dir and not os.path.exists(output_dir):
+                                    os.makedirs(output_dir, exist_ok=True)
                                 with open(output_path, "wb") as f:
                                     f.write(image_data)
                                 print(f"\n   Saved: {output_path}")

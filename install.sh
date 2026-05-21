@@ -53,7 +53,8 @@ else
     read -r -s API_KEY_INPUT
     echo ""
     if [ -n "$API_KEY_INPUT" ]; then
-        if ! grep -q "IMAGE_GEN_API_KEY" "$SHELL_RC" 2>/dev/null; then
+        # Use word boundary matching for more precise detection
+        if ! grep -q "^export IMAGE_GEN_API_KEY=" "$SHELL_RC" 2>/dev/null; then
             echo "export IMAGE_GEN_API_KEY=\"$API_KEY_INPUT\"" >> "$SHELL_RC"
             export IMAGE_GEN_API_KEY="$API_KEY_INPUT"
             echo "   IMAGE_GEN_API_KEY: saved to $SHELL_RC"
@@ -72,7 +73,7 @@ else
     echo "   Enter your API base URL (press Enter for default: https://api.openai.com/v1):"
     read -r API_URL_INPUT
     if [ -n "$API_URL_INPUT" ]; then
-        if ! grep -q "IMAGE_GEN_API_URL" "$SHELL_RC" 2>/dev/null; then
+        if ! grep -q "^export IMAGE_GEN_API_URL=" "$SHELL_RC" 2>/dev/null; then
             echo "export IMAGE_GEN_API_URL=\"$API_URL_INPUT\"" >> "$SHELL_RC"
             export IMAGE_GEN_API_URL="$API_URL_INPUT"
             echo "   IMAGE_GEN_API_URL: saved to $SHELL_RC"
@@ -91,7 +92,7 @@ else
     echo "   Enter default model name (press Enter for default: openai/gpt-image-2):"
     read -r MODEL_INPUT
     if [ -n "$MODEL_INPUT" ]; then
-        if ! grep -q "IMAGE_GEN_MODEL" "$SHELL_RC" 2>/dev/null; then
+        if ! grep -q "^export IMAGE_GEN_MODEL=" "$SHELL_RC" 2>/dev/null; then
             echo "export IMAGE_GEN_MODEL=\"$MODEL_INPUT\"" >> "$SHELL_RC"
             export IMAGE_GEN_MODEL="$MODEL_INPUT"
             echo "   IMAGE_GEN_MODEL: saved to $SHELL_RC"
@@ -115,6 +116,43 @@ python3 -c "import requests" 2>/dev/null && \
     echo "   Dependencies: OK" || \
     echo "   Dependencies: FAILED"
 
+# Verify API configuration if key is set
+if [ -n "$IMAGE_GEN_API_KEY" ]; then
+    echo ""
+    echo "   Testing API connection..."
+    API_URL_TEST="${IMAGE_GEN_API_URL:-https://api.openai.com/v1}"
+    if [[ "$API_URL_TEST" != */chat/completions ]]; then
+        if [[ "$API_URL_TEST" != */ ]]; then
+            API_URL_TEST="$API_URL_TEST/chat/completions"
+        else
+            API_URL_TEST="${API_URL_TEST}chat/completions"
+        fi
+    fi
+
+    RESPONSE=$(python3 -c "
+import requests
+import json
+try:
+    r = requests.post('$API_URL_TEST',
+        headers={'Authorization': 'Bearer $IMAGE_GEN_API_KEY', 'Content-Type': 'application/json'},
+        json={'model': 'gpt-image-1', 'messages': [{'role': 'user', 'content': [{'type': 'text', 'text': 'test'}]}]},
+        timeout=10)
+    if r.status_code == 200:
+        print('OK')
+    else:
+        print('FAIL:' + str(r.status_code) + ':' + r.text[:100])
+except Exception as e:
+    print('FAIL:' + str(e))
+" 2>/dev/null)
+
+    if [[ "$RESPONSE" == "OK" ]]; then
+        echo "   API connection: OK"
+    else
+        echo "   API connection: $RESPONSE"
+        echo "   Please check your API key and URL"
+    fi
+fi
+
 echo ""
 echo "========================================="
 echo "  Installation complete!"
@@ -127,4 +165,5 @@ echo "With reference image:"
 echo "  python generate.py --prompt \"your prompt\" --image-file ref.jpg --output image.png"
 echo ""
 echo "Config file: $SHELL_RC"
+echo "Please restart your terminal or run: source $SHELL_RC"
 echo ""
