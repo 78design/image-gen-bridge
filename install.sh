@@ -26,15 +26,15 @@ echo "[1/3] Installing Python dependencies..."
 
 # Detect virtual environment to avoid --break-system-packages warnings
 if [ -n "$VIRTUAL_ENV" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ]; then
-    pip install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null || {
+    pip install requests 2>/dev/null || {
         echo "Error: Failed to install dependencies."
-        echo "Please run manually: pip install -r requirements.txt"
+        echo "Please run manually: pip install requests"
         exit 1
     }
 else
-    pip install -r "$SCRIPT_DIR/requirements.txt" --break-system-packages 2>/dev/null || {
+    pip install requests --break-system-packages 2>/dev/null || {
         echo "Error: Failed to install dependencies."
-        echo "Please run manually: pip install -r requirements.txt"
+        echo "Please run manually: pip install requests"
         exit 1
     }
 fi

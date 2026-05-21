@@ -80,7 +80,7 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                 valid_images.append(image_file)
             else:
                 print(f"   Warning: Image file not found: {image_file}")
-        
+
         if valid_images:
             print(f"   Mode: Image-to-Image (refs: {', '.join(valid_images)})")
             for image_file in valid_images:

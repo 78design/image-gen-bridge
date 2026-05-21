@@ -5,9 +5,7 @@ description: AI图片生成工具，通过OpenAI兼容接口调用各类生图�
 
 # image-gen-bridge
 
-AI图片生成工具，通过OpenAI兼容接口调用各类生图模型。
-
-支持文生图（Text-to-Image）和图生图（Image-to-Image），适用于各种OpenAI兼容的中转站/代理服务。
+当用户需要生成图片时使用此技能。支持文生图（Text-to-Image）和图生图（Image-to-Image，支持单张或多张参考图）。
 
 ## When to use
 
@@ -15,153 +13,134 @@ AI图片生成工具，通过OpenAI兼容接口调用各类生图模型。
 - 当用户提到 DALL-E、Stable Diffusion、FLUX 等图像生成关键词时
 - 当用户需要生成产品图、设计图、概念图等
 
-## Features
-
-- Text-to-Image generation
-- Image-to-Image generation (with one or multiple reference images)
-- Compatible with any OpenAI-compatible API endpoint
-- Support for custom models (DALL-E, GPT-Image, Stable Diffusion, etc.)
-- Environment variable configuration
-- Automatic image URL extraction from markdown responses
-
 ## Quick Start
 
-### 1. Clone
+### 1. 安装配置
 
 ```bash
+# 克隆仓库
 git clone https://github.com/78design/image-gen-bridge.git
 cd image-gen-bridge
+
+# 运行安装脚本
+bash install.sh
 ```
 
-### 2. Install
+安装过程会引导配置：
+- API Key（必需）
+- API URL（默认：https://api.openai.com/v1）
+- 默认模型（默认：openai/gpt-image-2）
 
+### 2. 生成图片
+
+**文生图模式：**
 ```bash
-pip install -r requirements.txt
+python generate.py --prompt "一只可爱的橘猫在阳光下打盹" --output cat.png
 ```
 
-### 3. Configure
-
-Set your API key and endpoint:
-
+**图生图模式（单张参考）：**
 ```bash
-export IMAGE_GEN_API_KEY="your-api-key"
-export IMAGE_GEN_API_URL="https://your-proxy.com/v1"
-export IMAGE_GEN_MODEL="your-model-name"
+python generate.py --prompt "把这只猫放在沙发上" \
+  --image-file cat.png --output cat_on_sofa.png
 ```
 
-### 4. Generate
-
+**图生图模式（多张参考）：**
 ```bash
-# Text-to-Image
-python generate.py --prompt "A cute cat sitting on a sofa" --output cat.png
-
-# Image-to-Image (single reference)
-python generate.py --prompt "A stylish woman carrying this keychain" \
-  --image-file product.jpg \
-  --output fashion.png
-
-# Image-to-Image (multiple references)
-python generate.py --prompt "Combine the style of these two images" \
-  --image-file style1.jpg --image-file style2.jpg \
-  --output combined.png
+python generate.py --prompt "结合两张图的风格" \
+  --image-file style1.png --image-file style2.png \
+  --output result.png
 ```
 
-## Configuration
+## 环境变量
 
-### Environment Variables
+| 变量 | 必需 | 默认值 | 说明 |
+|------|------|--------|------|
+| `IMAGE_GEN_API_KEY` | 是 | - | API 密钥 |
+| `IMAGE_GEN_API_URL` | 否 | `https://api.openai.com/v1` | API 基础地址 |
+| `IMAGE_GEN_MODEL` | 否 | `openai/gpt-image-2` | 默认模型名称 |
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `IMAGE_GEN_API_KEY` | Yes | - | API key for authentication |
-| `IMAGE_GEN_API_URL` | No | `https://api.openai.com/v1` | API base URL |
-| `IMAGE_GEN_MODEL` | No | `openai/gpt-image-2` | Default model name |
+## 命令行参数
 
-### Command Line Arguments
+| 参数 | 必需 | 说明 |
+|------|------|------|
+| `--prompt` | 是 | 图片描述文本 |
+| `--image-file` | 否 | 参考图片路径（可多次使用添加多张） |
+| `--output` | 否 | 输出文件路径 |
+| `--api-url` | 否 | API 地址（覆盖环境变量） |
+| `--api-key` | 否 | API 密钥（覆盖环境变量） |
+| `--model` | 否 | 模型名称（覆盖环境变量） |
 
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `--prompt` | Yes | Text prompt for image generation |
-| `--image-file` | No | Path to reference image(s) (image-to-image, multiple allowed) |
-| `--output` | No | Output file path |
-| `--api-url` | No | API base URL (overrides env) |
-| `--api-key` | No | API key (overrides env) |
-| `--model` | No | Model name (overrides env) |
+命令行参数优先于环境变量。
 
-Command line arguments take priority over environment variables.
+## 使用示例
 
-## Usage Examples
-
-### Basic Text-to-Image
+### 基础文生图
 
 ```bash
 python generate.py \
-  --prompt "A beautiful sunset over the ocean" \
+  --prompt "美丽的海上日落" \
   --output sunset.png
 ```
 
-### Image-to-Image with Single Reference
+### 单参考图生图
 
 ```bash
 python generate.py \
-  --prompt "A 22-year-old woman wearing a white crop top and jeans, carrying a bag with this plush keychain attached. Street fashion photography" \
+  --prompt "一个年轻女性穿着白色背心和牛仔裤，背着带有这个钥匙扣的包包，街头时尚摄影" \
   --image-file ./product_photo.jpg \
   --output fashion_shot.png
 ```
 
-### Image-to-Image with Multiple References
+### 多参考图生图
 
 ```bash
 python generate.py \
-  --prompt "Create a product photo combining the lighting from photo1 and the composition from photo2" \
+  --prompt "结合photo1的光线和photo2的构图创建产品照片" \
   --image-file ./photo1.jpg --image-file ./photo2.jpg \
   --output combined_product.png
 ```
 
-### Using Different API Providers
+### 使用不同 API 提供商
 
 ```bash
-# Provider A
+# 提供商 A
 python generate.py \
-  --prompt "A fantasy castle" \
+  --prompt "一座幻想城堡" \
   --api-url "https://provider-a.com/v1" \
   --model "dall-e-3" \
   --output castle.png
 
-# Provider B
+# 提供商 B
 python generate.py \
-  --prompt "A cyberpunk city" \
+  --prompt "一座赛博朋克城市" \
   --api-url "https://provider-b.com/v1" \
   --model "stable-diffusion-xl" \
   --output cyberpunk.png
 ```
 
-### One-liner with Environment Variables
+### 一行命令配置
 
 ```bash
 IMAGE_GEN_API_KEY="sk-xxx" \
 IMAGE_GEN_API_URL="https://your-proxy.com/v1" \
 IMAGE_GEN_MODEL="gpt-image-2" \
-python generate.py --prompt "A cute dog" --output dog.png
+python generate.py --prompt "一只可爱的狗" --output dog.png
 ```
 
-## Installation Script
+## 安装脚本
 
-Run the included install script for quick setup:
+运行附带的安装脚本快速配置：
 
 ```bash
 bash install.sh
 ```
 
-This will:
-1. Install Python dependencies
-2. Guide you through API configuration
-3. Verify the installation
+这将：
+1. 安装 Python 依赖（requests 库）
+2. 引导配置 API 密钥和参数
+3. 验证安装
 
-## Requirements
+## 系统要求
 
 - Python 3.7+
 - requests >= 2.31.0
-
-## License
-
-MIT
