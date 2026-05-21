@@ -1,235 +1,136 @@
 #!/usr/bin/env python3
-"""
-image-gen-bridge - AI图片生成工具
-
-通过OpenAI兼容接口调用各类生图模型，支持文生图和图生图。
-适用于各种OpenAI兼容的中转站/代理服务。
-"""
+"""image-gen-bridge - AI图片生成工具"""
 
 import argparse
 import base64
 import os
 import re
 import sys
-from pathlib import Path
 
 try:
     import requests
 except ImportError:
-    print("Error: requests library not installed.")
-    print("Run: pip install requests")
+    print("Error: requests library not installed. Run: pip install requests")
     sys.exit(1)
 
 
 def encode_image_to_base64(image_path):
-    """Encode image file to base64 string."""
     with open(image_path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
 
 def download_image(url, output_path):
-    """Download image from URL and save to file."""
     try:
-        # Create output directory if it doesn't exist
         output_dir = os.path.dirname(output_path)
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
-
         response = requests.get(url, timeout=60)
         response.raise_for_status()
         with open(output_path, "wb") as f:
             f.write(response.content)
         return True
     except Exception as e:
-        print(f"   Download failed: {e}")
+        print(f"Download failed: {e}")
         return False
 
 
-def extract_image_url_from_markdown(content):
-    """Extract image URL from markdown content."""
+def extract_image_url(content):
     pattern = r'!\[.*?\]\((https?://[^\)]+)\)'
-    match = re.search(pattern, content)
-    if match:
-        return match.group(1)
-    return None
+    match = re.search(pattern, str(content))
+    return match.group(1) if match else None
 
 
 def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None):
-    """Generate image using OpenAI-compatible API."""
-
-    # Ensure api_url ends with /chat/completions
     if not api_url.endswith("/chat/completions"):
-        if api_url.endswith("/"):
-            api_url = api_url + "chat/completions"
-        else:
-            api_url = api_url + "/chat/completions"
+        api_url = api_url.rstrip("/") + "/chat/completions"
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
 
-    messages = [{"role": "user", "content": []}]
-
-    # Add text prompt
-    messages[0]["content"].append({
-        "type": "text",
-        "text": prompt
-    })
-
-    # Add reference images if provided
     if image_files and len(image_files) > 0:
-        valid_images = []
-        for image_file in image_files:
-            if os.path.exists(image_file):
-                valid_images.append(image_file)
-            else:
-                print(f"   Warning: Image file not found: {image_file}")
-
+        valid_images = [f for f in image_files if os.path.exists(f)]
         if valid_images:
-            print(f"   Mode: Image-to-Image (refs: {', '.join(valid_images)})")
+            print(f"Mode: Image-to-Image (refs: {', '.join(valid_images)})")
             for image_file in valid_images:
-                image_base64 = encode_image_to_base64(image_file)
-                image_ext = Path(image_file).suffix.lower()
-                mime_type = "image/jpeg" if image_ext in [".jpg", ".jpeg"] else "image/png"
-
+                img_base64 = encode_image_to_base64(image_file)
+                ext = os.path.splitext(image_file)[1].lower()
+                mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else "image/png"
                 messages[0]["content"].append({
                     "type": "image_url",
-                    "image_url": {
-                        "url": f"data:{mime_type};base64,{image_base64}"
-                    }
+                    "image_url": {"url": f"data:{mime};base64,{img_base64}"}
                 })
         else:
-            print("   Warning: No valid reference images found")
-            print("   Falling back to text-to-image mode.")
+            print("Warning: No valid reference images, using text-to-image mode")
     else:
-        print("   Mode: Text-to-Image")
+        print("Mode: Text-to-Image")
 
-    print(f"   Model: {model}")
-    print(f"   API: {api_url}")
-    print(f"   Prompt: {prompt[:80]}{'...' if len(prompt) > 80 else ''}")
-
-    payload = {
-        "model": model,
-        "messages": messages
-    }
+    print(f"Model: {model}\nAPI: {api_url}\nPrompt: {prompt[:80]}...")
 
     try:
-        response = requests.post(api_url, headers=headers, json=payload, timeout=120)
+        response = requests.post(api_url, headers=headers, json={"model": model, "messages": messages}, timeout=120)
         response.raise_for_status()
         result = response.json()
 
-        # Check if API returned an error
         if "error" in result:
-            error_msg = result["error"].get("message", "Unknown error")
-            print(f"\n   API Error: {error_msg}")
+            print(f"API Error: {result['error'].get('message', 'Unknown error')}")
             return None
 
-        if "choices" in result and len(result["choices"]) > 0:
-            message = result["choices"][0].get("message", {})
-            content = message.get("content", "")
+        content = result["choices"][0]["message"].get("content", "")
+        image_url = extract_image_url(content)
 
-            # Try extract image URL from markdown response
-            image_url = extract_image_url_from_markdown(str(content))
-            if image_url:
-                print(f"   Image URL: {image_url}")
-                if output_path:
-                    if download_image(image_url, output_path):
-                        print(f"\n   Saved: {output_path}")
-                        return output_path
-                return image_url
+        if image_url:
+            print(f"Image URL: {image_url}")
+            if output_path:
+                if download_image(image_url, output_path):
+                    print(f"Saved: {output_path}")
+                    return output_path
+            return image_url
 
-            # Try extract base64 image from array response
-            if isinstance(content, list):
-                for item in content:
-                    if isinstance(item, dict) and item.get("type") == "image_url":
-                        img_url = item.get("image_url", {}).get("url", "")
-                        if img_url.startswith("data:image"):
-                            base64_data = img_url.split(",")[1]
-                            image_data = base64.b64decode(base64_data)
-                            if output_path:
-                                output_dir = os.path.dirname(output_path)
-                                if output_dir and not os.path.exists(output_dir):
-                                    os.makedirs(output_dir, exist_ok=True)
-                                with open(output_path, "wb") as f:
-                                    f.write(image_data)
-                                print(f"\n   Saved: {output_path}")
-                                return output_path
-
-        print(f"\n   Failed: Cannot extract image from response")
+        print("Failed: Cannot extract image from response")
         return None
 
     except requests.exceptions.Timeout:
-        print("\n   Failed: API request timed out")
+        print("Failed: Request timed out")
         return None
-    except requests.exceptions.RequestException as e:
-        print(f"\n   Failed: API request error - {e}")
+    except Exception as e:
+        print(f"Failed: {e}")
         return None
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="image-gen-bridge - AI Image Generation via OpenAI-compatible API",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+    parser = argparse.ArgumentParser(description="image-gen-bridge - AI Image Generation",
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog="""
 Examples:
-  # Text-to-Image
   python generate.py --prompt "A cute cat" --output cat.png
-
-  # Image-to-Image (with single reference)
-  python generate.py --prompt "A woman wearing this keychain" \\
-    --image-file product.jpg --output fashion.png
-
-  # Image-to-Image (with multiple references)
-  python generate.py --prompt "Combine the style of both images" \\
-    --image-file style1.jpg --image-file style2.jpg --output combined.png
-
-  # Custom API endpoint and model
-  python generate.py --prompt "A sunset landscape" \\
-    --api-url "https://your-proxy.com/v1" \\
-    --model "dall-e-3" \\
-    --output sunset.png
+  python generate.py --prompt "Style transfer" --image-file ref.jpg --output result.png
+  python generate.py --prompt "Combine styles" --image-file a.jpg --image-file b.jpg --output combined.png
 
 Environment Variables:
-  IMAGE_GEN_API_KEY    API key (required)
-  IMAGE_GEN_API_URL    API base URL (default: https://api.openai.com/v1)
-  IMAGE_GEN_MODEL      Default model name
-        """
-    )
+  IMAGE_GEN_API_KEY    Required
+  IMAGE_GEN_API_URL    Default: https://api.openai.com/v1
+  IMAGE_GEN_MODEL      Default: openai/gpt-image-2
+                                     """)
 
-    parser.add_argument("--prompt", required=True, help="Text prompt for image generation")
-    parser.add_argument("--image-file", action="append", help="Path to reference image (image-to-image mode, multiple allowed)")
-    parser.add_argument("--output", help="Output file path")
-    parser.add_argument("--api-url", help="API base URL (or set IMAGE_GEN_API_URL)")
-    parser.add_argument("--api-key", help="API key (or set IMAGE_GEN_API_KEY)")
-    parser.add_argument("--model", help="Model name (or set IMAGE_GEN_MODEL)")
-
+    parser.add_argument("--prompt", required=True, help="Text prompt")
+    parser.add_argument("--image-file", action="append", help="Reference image(s)")
+    parser.add_argument("--output", help="Output file")
+    parser.add_argument("--api-url", help="API URL")
+    parser.add_argument("--api-key", help="API key")
+    parser.add_argument("--model", help="Model name")
     args = parser.parse_args()
 
-    # Get config from args or environment variables
     api_key = args.api_key or os.environ.get("IMAGE_GEN_API_KEY")
     api_url = args.api_url or os.environ.get("IMAGE_GEN_API_URL", "https://api.openai.com/v1")
     model = args.model or os.environ.get("IMAGE_GEN_MODEL", "openai/gpt-image-2")
 
     if not api_key:
-        print("Error: API key is required.")
-        print("Set via --api-key or environment variable IMAGE_GEN_API_KEY")
+        print("Error: API key required. Set via --api-key or IMAGE_GEN_API_KEY")
         sys.exit(1)
 
     print("Generating image...")
-    result = generate_image(
-        prompt=args.prompt,
-        api_url=api_url,
-        api_key=api_key,
-        model=model,
-        image_files=args.image_file,
-        output_path=args.output
-    )
-
-    if result:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output)
+    sys.exit(0 if result else 1)
 
 
 if __name__ == "__main__":
