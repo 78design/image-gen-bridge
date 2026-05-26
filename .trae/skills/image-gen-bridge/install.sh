@@ -22,19 +22,41 @@ echo ""
 
 echo "[1/3] Installing Python dependencies..."
 
-if [ -n "$VIRTUAL_ENV" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ]; then
-    pip install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null || {
-        echo "Error: Failed to install dependencies."
-        echo "Please run manually: pip install -r requirements.txt"
-        exit 1
-    }
-else
-    pip install -r "$SCRIPT_DIR/requirements.txt" --break-system-packages 2>/dev/null || {
-        echo "Error: Failed to install dependencies."
-        echo "Please run manually: pip install -r requirements.txt"
-        exit 1
-    }
+# Try pip3 first, fallback to pip
+PIP_CMD="pip3"
+if ! command -v $PIP_CMD &> /dev/null; then
+    PIP_CMD="pip"
 fi
+
+echo "   Using: $PIP_CMD"
+
+install_deps() {
+    if [ -n "$VIRTUAL_ENV" ] || [ -f "pyproject.toml" ] || [ -f "Pipfile" ]; then
+        $PIP_CMD install -r "$SCRIPT_DIR/requirements.txt" -i https://mirrors.aliyun.com/pypi/simple/
+    else
+        $PIP_CMD install -r "$SCRIPT_DIR/requirements.txt" -i https://mirrors.aliyun.com/pypi/simple/ --break-system-packages 2>/dev/null || \
+            $PIP_CMD install -r "$SCRIPT_DIR/requirements.txt" -i https://mirrors.aliyun.com/pypi/simple/
+    fi
+}
+
+if ! install_deps; then
+    echo ""
+    echo "Warning: Failed to install dependencies with default mirror."
+    echo "         Trying without mirror..."
+    echo ""
+    if ! $PIP_CMD install -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null; then
+        echo ""
+        echo "Error: Failed to install dependencies."
+        echo ""
+        echo "Please install manually using one of these commands:"
+        echo "  pip3 install -r $SCRIPT_DIR/requirements.txt"
+        echo "  or"
+        echo "  pip install -r $SCRIPT_DIR/requirements.txt"
+        echo ""
+        exit 1
+    fi
+fi
+
 echo "   Done."
 echo ""
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """image-gen-bridge - AI图片生成工具"""
 
 import argparse
@@ -146,8 +147,14 @@ Environment Variables:
     if not api_key:
         print("Error: API key required. Set via --api-key or IMAGE_GEN_API_KEY")
         sys.exit(1)
+    
+    if len(api_key) < 10:
+        print("Error: Invalid API key format.")
+        print("API key should be at least 10 characters long.")
+        sys.exit(1)
 
     print("Generating image...")
+    print("  → Connecting to API...")
     result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output, args.number)
     sys.exit(0 if result else 1)
 
