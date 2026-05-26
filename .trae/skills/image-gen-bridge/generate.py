@@ -49,7 +49,7 @@ def extract_image_url_from_markdown(content):
     return None
 
 
-def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None):
+def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None, n=1):
     """Generate image using OpenAI-compatible API."""
 
     # Ensure api_url ends with /chat/completions
@@ -102,11 +102,13 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
 
     print(f"   Model: {model}")
     print(f"   API: {api_url}")
+    print(f"   Number of images: {n}")
     print(f"   Prompt: {prompt[:80]}{'...' if len(prompt) > 80 else ''}")
 
     payload = {
         "model": model,
-        "messages": messages
+        "messages": messages,
+        "n": n
     }
 
     try:
@@ -114,35 +116,62 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
         response.raise_for_status()
         result = response.json()
 
+        results = []
+        
         if "choices" in result and len(result["choices"]) > 0:
-            message = result["choices"][0].get("message", {})
-            content = message.get("content", "")
+            for idx, choice in enumerate(result["choices"]):
+                message = choice.get("message", {})
+                content = message.get("content", "")
+                image_url = None
+                
+                # Try extract image URL from markdown response
+                extracted_url = extract_image_url_from_markdown(str(content))
+                if extracted_url:
+                    image_url = extracted_url
+                # Try extract base64 image from array response
+                elif isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and item.get("type") == "image_url":
+                            img_url = item.get("image_url", {}).get("url", "")
+                            if img_url.startswith("data:image"):
+                                image_url = img_url
 
-            # Try extract image URL from markdown response
-            image_url = extract_image_url_from_markdown(str(content))
-            if image_url:
-                print(f"   Image URL: {image_url}")
-                if output_path:
-                    if download_image(image_url, output_path):
-                        print(f"\n   Saved: {output_path}")
-                        return output_path
-                return image_url
-
-            # Try extract base64 image from array response
-            if isinstance(content, list):
-                for item in content:
-                    if isinstance(item, dict) and item.get("type") == "image_url":
-                        img_url = item.get("image_url", {}).get("url", "")
-                        if img_url.startswith("data:image"):
-                            base64_data = img_url.split(",")[1]
+                if image_url:
+                    print(f"   Image {idx+1} URL: {image_url}")
+                    
+                    if output_path:
+                        # Generate output filename with index
+                        if n > 1:
+                            path_obj = Path(output_path)
+                            numbered_output = str(path_obj.parent / f"{path_obj.stem}_{idx+1}{path_obj.suffix}")
+                        else:
+                            numbered_output = output_path
+                        
+                        # Create output directory if needed
+                        output_dir = os.path.dirname(numbered_output)
+                        if output_dir and not os.path.exists(output_dir):
+                            os.makedirs(output_dir, exist_ok=True)
+                        
+                        # Download or save base64
+                        if image_url.startswith("data:image"):
+                            base64_data = image_url.split(",")[1]
                             image_data = base64.b64decode(base64_data)
-                            if output_path:
-                                with open(output_path, "wb") as f:
-                                    f.write(image_data)
-                                print(f"\n   Saved: {output_path}")
-                                return output_path
+                            with open(numbered_output, "wb") as f:
+                                f.write(image_data)
+                            print(f"   Saved: {numbered_output}")
+                            results.append(numbered_output)
+                        else:
+                            if download_image(image_url, numbered_output):
+                                print(f"   Saved: {numbered_output}")
+                                results.append(numbered_output)
+                    else:
+                        results.append(image_url)
 
-        print(f"\n   Failed: Cannot extract image from response")
+        if results:
+            print(f"\n   Successfully generated {len(results)} image(s)")
+            return results if len(results) > 1 else results[0]
+        
+        print(f"\n   Failed: Cannot extract images from response")
         return None
 
     except requests.exceptions.Timeout:
@@ -159,8 +188,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Text-to-Image
+  # Text-to-Image (single)
   python generate.py --prompt "A cute cat" --output cat.png
+
+  # Text-to-Image (multiple, 4 images)
+  python generate.py --prompt "A cute cat" --number 4 --output cat.png
 
   # Image-to-Image (with single reference)
   python generate.py --prompt "A woman wearing this keychain" \\
@@ -186,6 +218,7 @@ Environment Variables:
     parser.add_argument("--prompt", required=True, help="Text prompt for image generation")
     parser.add_argument("--image-file", action="append", help="Path to reference image (image-to-image mode, multiple allowed)")
     parser.add_argument("--output", help="Output file path")
+    parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
     parser.add_argument("--api-url", help="API base URL (or set IMAGE_GEN_API_URL)")
     parser.add_argument("--api-key", help="API key (or set IMAGE_GEN_API_KEY)")
     parser.add_argument("--model", help="Model name (or set IMAGE_GEN_MODEL)")
@@ -209,7 +242,8 @@ Environment Variables:
         api_key=api_key,
         model=model,
         image_files=args.image_file,
-        output_path=args.output
+        output_path=args.output,
+        n=args.number
     )
 
     if result:

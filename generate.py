@@ -40,7 +40,7 @@ def extract_image_url(content):
     return match.group(1) if match else None
 
 
-def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None):
+def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None, n=1):
     if not api_url.endswith("/chat/completions"):
         api_url = api_url.rstrip("/") + "/chat/completions"
 
@@ -64,10 +64,10 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     else:
         print("Mode: Text-to-Image")
 
-    print(f"Model: {model}\nAPI: {api_url}\nPrompt: {prompt[:80]}...")
+    print(f"Model: {model}\nAPI: {api_url}\nNumber of images: {n}\nPrompt: {prompt[:80]}...")
 
     try:
-        response = requests.post(api_url, headers=headers, json={"model": model, "messages": messages}, timeout=120)
+        response = requests.post(api_url, headers=headers, json={"model": model, "messages": messages, "n": n}, timeout=120)
         response.raise_for_status()
         result = response.json()
 
@@ -75,16 +75,33 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
             print(f"API Error: {result['error'].get('message', 'Unknown error')}")
             return None
 
-        content = result["choices"][0]["message"].get("content", "")
-        image_url = extract_image_url(content)
+        results = []
+        
+        if "choices" in result and len(result["choices"]) > 0:
+            for idx, choice in enumerate(result["choices"]):
+                content = choice["message"].get("content", "")
+                image_url = extract_image_url(content)
 
-        if image_url:
-            print(f"Image URL: {image_url}")
-            if output_path:
-                if download_image(image_url, output_path):
-                    print(f"Saved: {output_path}")
-                    return output_path
-            return image_url
+                if image_url:
+                    print(f"Image {idx+1} URL: {image_url}")
+                    
+                    if output_path:
+                        if n > 1:
+                            path_dir, path_base = os.path.split(output_path)
+                            path_name, path_ext = os.path.splitext(path_base)
+                            numbered_output = os.path.join(path_dir, f"{path_name}_{idx+1}{path_ext}")
+                        else:
+                            numbered_output = output_path
+                        
+                        if download_image(image_url, numbered_output):
+                            print(f"Saved: {numbered_output}")
+                            results.append(numbered_output)
+                    else:
+                        results.append(image_url)
+
+        if results:
+            print(f"Successfully generated {len(results)} image(s)")
+            return results if len(results) > 1 else results[0]
 
         print("Failed: Cannot extract image from response")
         return None
@@ -103,6 +120,7 @@ def main():
                                      epilog="""
 Examples:
   python generate.py --prompt "A cute cat" --output cat.png
+  python generate.py --prompt "A cute cat" --number 4 --output cat.png
   python generate.py --prompt "Style transfer" --image-file ref.jpg --output result.png
   python generate.py --prompt "Combine styles" --image-file a.jpg --image-file b.jpg --output combined.png
 
@@ -115,6 +133,7 @@ Environment Variables:
     parser.add_argument("--prompt", required=True, help="Text prompt")
     parser.add_argument("--image-file", action="append", help="Reference image(s)")
     parser.add_argument("--output", help="Output file")
+    parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
     parser.add_argument("--api-url", help="API URL")
     parser.add_argument("--api-key", help="API key")
     parser.add_argument("--model", help="Model name")
@@ -129,7 +148,7 @@ Environment Variables:
         sys.exit(1)
 
     print("Generating image...")
-    result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output)
+    result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output, args.number)
     sys.exit(0 if result else 1)
 
 
