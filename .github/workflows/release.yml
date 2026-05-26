@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      
+      - name: Create release package
+        run: |
+          mkdir -p build/image-gen-bridge
+          cp LICENSE README.md generate.py install.sh requirements.txt VERSION build/image-gen-bridge/
+          cp -r .trae/skills/image-gen-bridge/* build/image-gen-bridge/ 2>/dev/null || true
+          cd build
+          zip -r ../image-gen-bridge-v${{ env.VERSION }}.zip image-gen-bridge
+          cd ..
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: image-gen-bridge-v${{ env.VERSION }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
