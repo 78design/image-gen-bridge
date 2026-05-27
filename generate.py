@@ -41,7 +41,7 @@ def extract_image_url(content):
     return match.group(1) if match else None
 
 
-def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None, n=1):
+def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None, n=1, aspect_ratio="3:4"):
     if not api_url.endswith("/chat/completions"):
         api_url = api_url.rstrip("/") + "/chat/completions"
 
@@ -65,10 +65,19 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     else:
         print("Mode: Text-to-Image")
 
-    print(f"Model: {model}\nAPI: {api_url}\nNumber of images: {n}\nPrompt: {prompt[:80]}...")
+    print(f"Model: {model}\nAPI: {api_url}\nNumber of images: {n}\nAspect ratio: {aspect_ratio}\nPrompt: {prompt[:80]}...")
 
     try:
-        response = requests.post(api_url, headers=headers, json={"model": model, "messages": messages, "n": n}, timeout=120)
+        payload = {
+            "model": model,
+            "messages": messages,
+            "n": n
+        }
+        
+        if aspect_ratio:
+            payload["size"] = aspect_ratio
+        
+        response = requests.post(api_url, headers=headers, json=payload, timeout=120)
         response.raise_for_status()
         result = response.json()
 
@@ -135,6 +144,7 @@ Environment Variables:
     parser.add_argument("--image-file", action="append", help="Reference image(s)")
     parser.add_argument("--output", help="Output file")
     parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
+    parser.add_argument("--aspect-ratio", "--ratio", default="3:4", help="Image aspect ratio (default: 3:4, e.g., 1:1, 16:9, 9:16)")
     parser.add_argument("--api-url", help="API URL")
     parser.add_argument("--api-key", help="API key")
     parser.add_argument("--model", help="Model name")
@@ -155,7 +165,7 @@ Environment Variables:
 
     print("Generating image...")
     print("  → Connecting to API...")
-    result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output, args.number)
+    result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output, args.number, args.aspect_ratio)
     sys.exit(0 if result else 1)
 
 

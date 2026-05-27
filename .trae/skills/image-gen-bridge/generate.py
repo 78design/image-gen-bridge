@@ -50,7 +50,7 @@ def extract_image_url_from_markdown(content):
     return None
 
 
-def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None, n=1):
+def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None, n=1, aspect_ratio="3:4"):
     """Generate image using OpenAI-compatible API."""
 
     # Ensure api_url ends with /chat/completions
@@ -104,6 +104,7 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     print(f"   Model: {model}")
     print(f"   API: {api_url}")
     print(f"   Number of images: {n}")
+    print(f"   Aspect ratio: {aspect_ratio}")
     print(f"   Prompt: {prompt[:80]}{'...' if len(prompt) > 80 else ''}")
 
     payload = {
@@ -111,6 +112,9 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
         "messages": messages,
         "n": n
     }
+    
+    if aspect_ratio:
+        payload["size"] = aspect_ratio
 
     try:
         response = requests.post(api_url, headers=headers, json=payload, timeout=120)
@@ -220,6 +224,7 @@ Environment Variables:
     parser.add_argument("--image-file", action="append", help="Path to reference image (image-to-image mode, multiple allowed)")
     parser.add_argument("--output", help="Output file path")
     parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
+    parser.add_argument("--aspect-ratio", "--ratio", default="3:4", help="Image aspect ratio (default: 3:4, e.g., 1:1, 16:9, 9:16)")
     parser.add_argument("--api-url", help="API base URL (or set IMAGE_GEN_API_URL)")
     parser.add_argument("--api-key", help="API key (or set IMAGE_GEN_API_KEY)")
     parser.add_argument("--model", help="Model name (or set IMAGE_GEN_MODEL)")
@@ -250,7 +255,8 @@ Environment Variables:
         model=model,
         image_files=args.image_file,
         output_path=args.output,
-        n=args.number
+        n=args.number,
+        aspect_ratio=args.aspect_ratio
     )
 
     if result:
