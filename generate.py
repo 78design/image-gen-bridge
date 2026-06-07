@@ -46,6 +46,10 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
         api_url = api_url.rstrip("/") + "/chat/completions"
 
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+
+    if aspect_ratio:
+        prompt = f"{prompt}，图片比例为{aspect_ratio}"
+
     messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
 
     if image_files and len(image_files) > 0:
@@ -73,10 +77,6 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
             "messages": messages,
             "n": n
         }
-        
-        if aspect_ratio:
-            payload["size"] = aspect_ratio
-        
         response = requests.post(api_url, headers=headers, json=payload, timeout=120)
         response.raise_for_status()
         result = response.json()

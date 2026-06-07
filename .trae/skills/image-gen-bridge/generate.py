@@ -65,6 +65,9 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
         "Content-Type": "application/json"
     }
 
+    if aspect_ratio:
+        prompt = f"{prompt}，图片比例为{aspect_ratio}"
+
     messages = [{"role": "user", "content": []}]
 
     # Add text prompt
@@ -112,9 +115,6 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
         "messages": messages,
         "n": n
     }
-    
-    if aspect_ratio:
-        payload["size"] = aspect_ratio
 
     try:
         response = requests.post(api_url, headers=headers, json=payload, timeout=120)
