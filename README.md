@@ -4,7 +4,7 @@ AI图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.1.0
+v1.4.0
 
 ## 🚀 安装方法
 
@@ -44,13 +44,13 @@ bash install.sh
 
 ### 方法三：下载压缩包安装
 
-**点击直接下载：[image-gen-bridge-v1.1.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.1.0/image-gen-bridge-v1.1.0.zip)**
+**点击直接下载：[image-gen-bridge-v1.4.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.4.0/image-gen-bridge-v1.4.0.zip)**
 
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.1.0) 页面下载：
+或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.4.0) 页面下载：
 
 ```bash
 # 解压
-unzip image-gen-bridge-v1.1.0.zip
+unzip image-gen-bridge-v1.4.0.zip
 cd image-gen-bridge
 
 # 安装配置
@@ -128,6 +128,21 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--help` | ❌ | 显示帮助 |
 
 ## 🔄 更新日志
+
+### v1.4.0
+- 🔧 修复：`--aspect-ratio` 参数实现方式，从无效的 `size` payload 改为拼入 prompt 文本
+- 🔧 优化：默认 API 地址统一为 `https://api.1openapi.com/v1`
+- 🔧 优化：默认模型统一为 `openai/gpt-image-2`
+
+### v1.3.0
+- ✨ 新增：GitHub Actions 自动化发布流程
+- ✨ 新增：release.sh 一键版本发布脚本
+- 🔧 优化：压缩包生成流程集成到 CI
+
+### v1.2.0
+- ✨ 新增：支持多图生成（`--number` 参数）
+- ✨ 新增：支持图片比例参数（`--aspect-ratio`，默认 3:4）
+- 🔧 优化：安装脚本更健壮（支持 pip3、阿里云镜像、自动重试）
 
 ### v1.1.0
 - ✨ 新增：支持多图生成（`--number` 参数）
