@@ -30,7 +30,7 @@ python generate.py --prompt "描述" --image-file a.jpg --image-file b.jpg --out
 | Variable | Required | Default |
 |----------|----------|--------|
 | IMAGE_GEN_API_KEY | Yes | - |
-| IMAGE_GEN_API_URL | No | https://api.openai.com/v1 |
+| IMAGE_GEN_API_URL | No | https://api.1openapi.com/v1 |
 | IMAGE_GEN_MODEL | No | openai/gpt-image-2 |
 
 ## Arguments

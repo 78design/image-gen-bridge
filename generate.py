@@ -136,7 +136,7 @@ Examples:
 
 Environment Variables:
   IMAGE_GEN_API_KEY    Required
-  IMAGE_GEN_API_URL    Default: https://api.openai.com/v1
+  IMAGE_GEN_API_URL    Default: https://api.1openapi.com/v1
   IMAGE_GEN_MODEL      Default: openai/gpt-image-2
                                      """)
 
@@ -151,7 +151,7 @@ Environment Variables:
     args = parser.parse_args()
 
     api_key = args.api_key or os.environ.get("IMAGE_GEN_API_KEY")
-    api_url = args.api_url or os.environ.get("IMAGE_GEN_API_URL", "https://api.openai.com/v1")
+    api_url = args.api_url or os.environ.get("IMAGE_GEN_API_URL", "https://api.1openapi.com/v1")
     model = args.model or os.environ.get("IMAGE_GEN_MODEL", "openai/gpt-image-2")
 
     if not api_key:
