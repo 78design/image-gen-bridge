@@ -195,13 +195,19 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
             response = requests.post(api_url, headers=headers, json=payload, timeout=timeout)
 
             if response.status_code != 200:
+                print(f"\n{'='*60}")
+                print(f"API HTTP Error: {response.status_code}")
+                print(f"{'='*60}")
+                # 尝试解析 JSON 错误并完整输出
                 try:
                     err_body = response.json()
+                    import json
+                    print(f"\n[API Response Body]:")
+                    print(json.dumps(err_body, indent=2, ensure_ascii=False))
                 except Exception:
-                    err_body = {"raw": response.text[:500]}
-                err_detail = extract_error_detail(err_body)
-                print(f"HTTP {response.status_code} Error: {err_detail or response.text[:200]}")
-                last_error = f"HTTP {response.status_code}: {err_detail or response.text[:200]}"
+                    print(f"\n[Raw Response]: {response.text}")
+                print(f"{'='*60}\n")
+                last_error = f"HTTP {response.status_code}: {response.text[:500]}"
                 if attempt < MAX_RETRIES:
                     print("Retrying...")
                     continue
@@ -250,17 +256,27 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
             # 没提取到图片，检查是否是"生成中"或错误
             is_gen, gen_content = is_generating_response(result)
             if is_gen:
-                print(f"Warning: Backend not ready: {gen_content[:200]}")
-                last_error = f"Backend not ready: {gen_content[:200]}"
+                print(f"\n{'='*60}")
+                print(f"Backend Not Ready (生成中)")
+                print(f"{'='*60}")
+                print(f"[Raw Response Content]:\n{gen_content}")
+                print(f"{'='*60}\n")
+                last_error = f"Backend not ready: {gen_content}"
                 if attempt < MAX_RETRIES:
                     print("Retrying...")
                     continue
                 continue
 
-            # 检查错误信息
+            # 检查错误信息 - 完整输出
             err_detail = extract_error_detail(result)
             if err_detail:
-                print(f"API Error: {err_detail}")
+                print(f"\n{'='*60}")
+                print(f"API Error Detected")
+                print(f"{'='*60}")
+                import json
+                print(f"[Full API Response]:")
+                print(json.dumps(result, indent=2, ensure_ascii=False))
+                print(f"{'='*60}\n")
                 last_error = err_detail
                 if attempt < MAX_RETRIES:
                     print("Retrying...")
@@ -268,8 +284,15 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                 continue
 
             # 既没图片也没明确错误，输出原始内容
-            raw_content = str(result.get("choices", [{}])[0].get("message", {}).get("content", ""))[:300]
-            print(f"No images extracted. Raw content: {raw_content}")
+            raw_content = str(result.get("choices", [{}])[0].get("message", {}).get("content", ""))[:500]
+            print(f"\n{'='*60}")
+            print(f"No Images Extracted")
+            print(f"{'='*60}")
+            print(f"[Raw Response Content]:\n{raw_content}")
+            print(f"[Full API Response]:")
+            import json
+            print(json.dumps(result, indent=2, ensure_ascii=False)[:2000])
+            print(f"{'='*60}\n")
             last_error = f"No images in response: {raw_content}"
             if attempt < MAX_RETRIES:
                 print("Retrying...")
@@ -277,19 +300,52 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
             continue
 
         except requests.exceptions.Timeout:
-            print(f"Request timed out after {timeout}s")
+            print(f"\n{'='*60}")
+            print(f"Request Timeout")
+            print(f"{'='*60}")
+            print(f"Timeout after {timeout}s")
+            print(f"This usually means:")
+            print(f"  - API server is overloaded")
+            print(f"  - Network connectivity issues")
+            print(f"  - Image generation takes too long")
+            print(f"  - Try increasing --timeout parameter")
+            print(f"{'='*60}\n")
             last_error = f"Timeout after {timeout}s"
             if attempt < MAX_RETRIES:
                 print("Retrying...")
                 continue
+        except requests.exceptions.ConnectionError as e:
+            print(f"\n{'='*60}")
+            print(f"Connection Error")
+            print(f"{'='*60}")
+            print(f"Error: {e}")
+            print(f"This usually means:")
+            print(f"  - API server is down")
+            print(f"  - Network connectivity issues")
+            print(f"  - Firewall blocking the request")
+            print(f"{'='*60}\n")
+            last_error = f"Connection error: {e}"
+            if attempt < MAX_RETRIES:
+                print("Retrying...")
+                continue
         except Exception as e:
-            print(f"Request error: {e}")
+            print(f"\n{'='*60}")
+            print(f"Request Error")
+            print(f"{'='*60}")
+            print(f"Error: {e}")
+            print(f"{'='*60}\n")
             last_error = str(e)
             if attempt < MAX_RETRIES:
                 print("Retrying...")
                 continue
 
-    print(f"\nFailed after {MAX_RETRIES} attempts. Last error: {last_error}")
+    print(f"\n{'='*60}")
+    print(f"Failed after {MAX_RETRIES} attempts")
+    print(f"{'='*60}")
+    print(f"Last Error: {last_error}")
+    print(f"\nNote: If this is a third-party API, instability is normal.")
+    print(f"Wait for the API to recover and try again.")
+    print(f"{'='*60}")
     return None
 
 
