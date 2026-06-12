@@ -17,6 +17,7 @@ except ImportError:
 # 全局配置
 MAX_RETRIES = 2
 DEFAULT_TIMEOUT = 180
+DEFAULT_ASPECT_RATIO = "3:4"
 
 
 def encode_image_to_base64(image_path):
@@ -126,16 +127,20 @@ def extract_error_detail(result):
 
 
 def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None,
-                   n=1, aspect_ratio="3:4", timeout=DEFAULT_TIMEOUT):
+                   n=1, aspect_ratio=DEFAULT_ASPECT_RATIO, timeout=DEFAULT_TIMEOUT):
     if not api_url.endswith("/chat/completions"):
         api_url = api_url.rstrip("/") + "/chat/completions"
 
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
+    # 同时支持两种方式：payload size 参数 + prompt 文本补充
+    # 有些 API 支持 size 参数，有些不支持，两种都传提高兼容性
     if aspect_ratio:
-        prompt = f"{prompt}，图片比例为{aspect_ratio}"
+        prompt_with_ratio = f"{prompt}，图片比例为{aspect_ratio}"
+    else:
+        prompt_with_ratio = prompt
 
-    messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
+    messages = [{"role": "user", "content": [{"type": "text", "text": prompt_with_ratio}]}]
 
     if image_files and len(image_files) > 0:
         valid_images = [f for f in image_files if os.path.exists(f)]
@@ -154,13 +159,17 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     else:
         print("Mode: Text-to-Image")
 
-    print(f"Model: {model}\nAPI: {api_url}\nNumber of images: {n}\nAspect ratio: {aspect_ratio}\nTimeout: {timeout}s\nPrompt: {prompt[:80]}...")
+    print(f"Model: {model}\nAPI: {api_url}\nNumber of images: {n}\nAspect ratio: {aspect_ratio}\nTimeout: {timeout}s\nPrompt: {prompt_with_ratio[:80]}...")
 
     payload = {
         "model": model,
         "messages": messages,
         "n": n
     }
+
+    # 添加 size 参数（部分 API 支持）
+    if aspect_ratio:
+        payload["size"] = aspect_ratio
 
     results = []
     last_error = None
@@ -186,19 +195,57 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
 
             result = response.json()
 
-            # 检测 "生成中" 无效响应
+            # 【关键】先提取图片，提取到了就直接保存，不检查"生成中"
+            # 避免误判：有些API返回"生成中"文字+图片URL，图片有效不应丢弃
+            extracted = extract_images_from_response(result)
+
+            if extracted:
+                # 有图片，直接保存
+                for img_info in extracted:
+                    image_url = img_info["url"]
+                    idx = img_info["index"]
+
+                    if output_path:
+                        if n > 1:
+                            path_dir, path_base = os.path.split(output_path)
+                            path_name, path_ext = os.path.splitext(path_base)
+                            numbered_output = os.path.join(path_dir, f"{path_name}_{idx+1}{path_ext}")
+                        else:
+                            numbered_output = output_path
+
+                        if image_url.startswith("data:image"):
+                            b64_data = image_url.split(",", 1)[1]
+                            image_data = base64.b64decode(b64_data)
+                            with open(numbered_output, "wb") as f:
+                                f.write(image_data)
+                            print(f"Saved (base64): {numbered_output}")
+                            results.append(numbered_output)
+                        else:
+                            print(f"Image {idx+1} URL: {image_url}")
+                            if download_image(image_url, numbered_output):
+                                print(f"Saved: {numbered_output}")
+                                results.append(numbered_output)
+                    else:
+                        print(f"Image {idx+1} URL: {image_url}")
+                        results.append(image_url)
+
+                if results:
+                    print(f"\nSuccessfully generated {len(results)} image(s)")
+                    return results if len(results) > 1 else results[0]
+
+            # 没提取到图片，检查是否是"生成中"或错误
             is_gen, gen_content = is_generating_response(result)
             if is_gen:
-                print(f"Warning: API returned generating status: {gen_content[:200]}")
+                print(f"Warning: Backend not ready: {gen_content[:200]}")
                 last_error = f"Backend not ready: {gen_content[:200]}"
                 if attempt < MAX_RETRIES:
                     print("Retrying...")
                     continue
                 continue
 
-            # 提取错误
+            # 检查错误信息
             err_detail = extract_error_detail(result)
-            if err_detail and not is_generating_response(result)[0]:
+            if err_detail:
                 print(f"API Error: {err_detail}")
                 last_error = err_detail
                 if attempt < MAX_RETRIES:
@@ -206,50 +253,14 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                     continue
                 continue
 
-            # 提取图片
-            extracted = extract_images_from_response(result)
-
-            if not extracted:
-                raw_content = str(result.get("choices", [{}])[0].get("message", {}).get("content", ""))[:300]
-                print(f"No images extracted. Raw content: {raw_content}")
-                last_error = f"No images in response: {raw_content}"
-                if attempt < MAX_RETRIES:
-                    print("Retrying...")
-                    continue
+            # 既没图片也没明确错误，输出原始内容
+            raw_content = str(result.get("choices", [{}])[0].get("message", {}).get("content", ""))[:300]
+            print(f"No images extracted. Raw content: {raw_content}")
+            last_error = f"No images in response: {raw_content}"
+            if attempt < MAX_RETRIES:
+                print("Retrying...")
                 continue
-
-            # 保存图片
-            for img_info in extracted:
-                image_url = img_info["url"]
-                idx = img_info["index"]
-
-                if output_path:
-                    if n > 1:
-                        path_dir, path_base = os.path.split(output_path)
-                        path_name, path_ext = os.path.splitext(path_base)
-                        numbered_output = os.path.join(path_dir, f"{path_name}_{idx+1}{path_ext}")
-                    else:
-                        numbered_output = output_path
-
-                    if image_url.startswith("data:image"):
-                        b64_data = image_url.split(",", 1)[1]
-                        image_data = base64.b64decode(b64_data)
-                        with open(numbered_output, "wb") as f:
-                            f.write(image_data)
-                        print(f"Saved (base64): {numbered_output}")
-                        results.append(numbered_output)
-                    else:
-                        print(f"Image {idx+1} URL: {image_url}")
-                        if download_image(image_url, numbered_output):
-                            print(f"Saved: {numbered_output}")
-                            results.append(numbered_output)
-                else:
-                    print(f"Image {idx+1} URL: {image_url}")
-                    results.append(image_url)
-
-            if results:
-                print(f"\nSuccessfully generated {len(results)} image(s)")
-                return results if len(results) > 1 else results[0]
+            continue
 
         except requests.exceptions.Timeout:
             print(f"Request timed out after {timeout}s")
