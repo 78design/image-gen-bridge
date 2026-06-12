@@ -4,7 +4,7 @@ AI图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.7.0
+v1.8.0
 
 ## 🚀 安装方法
 
@@ -44,13 +44,13 @@ bash install.sh
 
 ### 方法三：下载压缩包安装
 
-**点击直接下载：[image-gen-bridge-v1.7.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.7.0/image-gen-bridge-v1.7.0.zip)**
+**点击直接下载：[image-gen-bridge-v1.8.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.0/image-gen-bridge-v1.8.0.zip)**
 
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.7.0) 页面下载：
+或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.0) 页面下载：
 
 ```bash
 # 解压
-unzip image-gen-bridge-v1.7.0.zip
+unzip image-gen-bridge-v1.8.0.zip
 cd image-gen-bridge
 
 # 安装配置
@@ -128,6 +128,12 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--help` | ❌ | 显示帮助 |
 
 ## 🔄 更新日志
+
+### v1.8.0
+- ✨ 新增：备用模型功能（`--backup-model`），主模型失败自动切换
+- ✨ 新增：增强错误信息输出，完整显示 API 原始响应
+- ✨ 新增：超时/连接错误专门处理和提示
+- 🐛 修复：size 参数格式转换为像素格式
 
 ### v1.7.0
 - 🐛 修复：size 参数格式错误，将比例格式转换为像素格式（如 "3:4" → "1024x1792"）
