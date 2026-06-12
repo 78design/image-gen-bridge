@@ -359,7 +359,8 @@ Examples:
   python generate.py --prompt "Style transfer" --image-file ref.jpg --output result.png
   python generate.py --prompt "Combine styles" --image-file a.jpg --image-file b.jpg --output combined.png
   python generate.py --prompt "A sunset" --timeout 300 --output sunset.png
-  python generate.py --prompt "A sunset" --backup-model "google/gemini-2.0-flash-preview" --output sunset.png
+  python generate.py --prompt "A sunset" --output sunset.png
+  (Automatically falls back to google/gemini-2.5-flash-image)
 
 Note:
   When using --number > 1, some API providers may not support
@@ -379,7 +380,7 @@ Environment Variables:
     parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
     parser.add_argument("--aspect-ratio", "--ratio", default="3:4", help="Image aspect ratio (default: 3:4, e.g., 1:1, 16:9, 9:16)")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT, help=f"Request timeout in seconds (default: {DEFAULT_TIMEOUT})")
-    parser.add_argument("--backup-model", help="Backup model to use if primary fails (e.g., google/gemini-2.0-flash-preview, google/gemini-pro)")
+    parser.add_argument("--backup-model", default="google/gemini-2.5-flash-image", help="Backup model if primary fails (default: google/gemini-2.5-flash-image)")
     parser.add_argument("--api-url", help="API URL")
     parser.add_argument("--api-key", help="API key")
     parser.add_argument("--model", help="Model name")
