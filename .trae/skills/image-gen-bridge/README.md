@@ -4,7 +4,7 @@ AI图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.1.0
+v1.8.1
 
 ## 🚀 安装方法
 
@@ -44,13 +44,13 @@ bash install.sh
 
 ### 方法三：下载压缩包安装
 
-**点击直接下载：[image-gen-bridge-v1.1.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.1.0/image-gen-bridge-v1.1.0.zip)**
+**点击直接下载：[image-gen-bridge-v1.8.1.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.1/image-gen-bridge-v1.8.1.zip)**
 
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.1.0) 页面下载：
+或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.1) 页面下载：
 
 ```bash
 # 解压
-unzip image-gen-bridge-v1.1.0.zip
+unzip image-gen-bridge-v1.8.1.zip
 cd image-gen-bridge
 
 # 安装配置
@@ -128,6 +128,50 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--help` | ❌ | 显示帮助 |
 
 ## 🔄 更新日志
+
+### v1.8.1
+- 🔧 优化：备用模型默认只保留 `google/gemini-2.5-flash-image`
+
+### v1.8.0
+- ✨ 新增：备用模型功能（`--backup-model`），主模型失败自动切换
+- ✨ 新增：增强错误信息输出，完整显示 API 原始响应
+- ✨ 新增：超时/连接错误专门处理和提示
+- 🐛 修复：size 参数格式转换为像素格式
+
+### v1.7.0
+- 🐛 修复：size 参数格式错误，将比例格式转换为像素格式（如 "3:4" → "1024x1792"）
+- ✨ 新增：支持多种比例映射（3:4, 4:3, 1:1, 16:9, 9:16, 21:9, 9:21）
+
+### v1.6.0
+- 🐛 修复：先提取图片再检查"生成中"，避免误判丢弃有效图片
+- ✨ 新增：aspect-ratio 同时支持 payload size 参数和 prompt 文本两种方式
+- ✨ 新增：自动重试机制（最多2次）
+- ✨ 新增：原始 API 错误信息输出
+- ✨ 新增：多格式图片解析（Markdown/Gemini/b64_json）
+- ✨ 新增：`--timeout` 参数可配置超时时间（默认180s）
+
+### v1.5.0
+- ✨ 新增：自动重试机制（最多2次），避免无限扣费
+- ✨ 新增：原始 API 错误信息输出（4xx/5xx/body字段）
+- ✨ 新增：多格式图片解析（Markdown/Gemini images/b64_json/数组）
+- ✨ 新增：识别"生成中"等无效响应并自动重试
+- ✨ 新增：`--timeout` 参数可配置超时时间（默认180s）
+- 🔧 修复：`--aspect-ratio` 参数改为拼入 prompt 文本
+- 🔧 优化：默认 API 地址统一为 `https://api.1openapi.com/v1`
+- 🔧 优化：默认模型统一为 `openai/gpt-image-2`
+
+### v1.4.0
+- 🔧 修复：aspect-ratio 参数改为拼入 prompt
+
+### v1.3.0
+- ✨ 新增：GitHub Actions 自动化发布流程
+- ✨ 新增：release.sh 一键版本发布脚本
+- 🔧 优化：压缩包生成流程集成到 CI
+
+### v1.2.0
+- ✨ 新增：支持多图生成（`--number` 参数）
+- ✨ 新增：支持图片比例参数（`--aspect-ratio`，默认 3:4）
+- 🔧 优化：安装脚本更健壮（支持 pip3、阿里云镜像、自动重试）
 
 ### v1.1.0
 - ✨ 新增：支持多图生成（`--number` 参数）
