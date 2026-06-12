@@ -4,7 +4,7 @@ AI图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.4.0
+v1.5.0
 
 ## 🚀 安装方法
 
@@ -44,13 +44,13 @@ bash install.sh
 
 ### 方法三：下载压缩包安装
 
-**点击直接下载：[image-gen-bridge-v1.4.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.4.0/image-gen-bridge-v1.4.0.zip)**
+**点击直接下载：[image-gen-bridge-v1.5.0.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.5.0/image-gen-bridge-v1.5.0.zip)**
 
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.4.0) 页面下载：
+或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.5.0) 页面下载：
 
 ```bash
 # 解压
-unzip image-gen-bridge-v1.4.0.zip
+unzip image-gen-bridge-v1.5.0.zip
 cd image-gen-bridge
 
 # 安装配置
@@ -129,10 +129,18 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 
 ## 🔄 更新日志
 
-### v1.4.0
-- 🔧 修复：`--aspect-ratio` 参数实现方式，从无效的 `size` payload 改为拼入 prompt 文本
+### v1.5.0
+- ✨ 新增：自动重试机制（最多2次），避免无限扣费
+- ✨ 新增：原始 API 错误信息输出（4xx/5xx/body字段）
+- ✨ 新增：多格式图片解析（Markdown/Gemini images/b64_json/数组）
+- ✨ 新增：识别"生成中"等无效响应并自动重试
+- ✨ 新增：`--timeout` 参数可配置超时时间（默认180s）
+- 🔧 修复：`--aspect-ratio` 参数改为拼入 prompt 文本
 - 🔧 优化：默认 API 地址统一为 `https://api.1openapi.com/v1`
 - 🔧 优化：默认模型统一为 `openai/gpt-image-2`
+
+### v1.4.0
+- 🔧 修复：aspect-ratio 参数改为拼入 prompt
 
 ### v1.3.0
 - ✨ 新增：GitHub Actions 自动化发布流程
