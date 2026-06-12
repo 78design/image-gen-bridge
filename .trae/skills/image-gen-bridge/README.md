@@ -96,7 +96,7 @@ python generate.py --prompt "结合两张参考图的风格" --image-file style1
 
 | Provider | API 地址 | 模型 |
 |----------|-----------|------|
-| 1OpenAPI ⭐ | api.1openapi.com/v1 | openai/gpt-image-2, google/gemini-3.1-flash-image-preview |
+| 1OpenAPI ⭐ | api.1openapi.com/v1 | openai/gpt-image-2, google/gemini-2.5-flash-image |
 | Custom | 自定义 | 自定义 |
 
 ## 🔧 手动配置
