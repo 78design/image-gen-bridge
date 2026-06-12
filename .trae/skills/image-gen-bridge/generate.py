@@ -19,6 +19,18 @@ MAX_RETRIES = 2
 DEFAULT_TIMEOUT = 180
 DEFAULT_ASPECT_RATIO = "3:4"
 
+# 比例到像素尺寸映射表
+# OpenAI/DALL-E 等模型需要像素格式，如 "1024x1792"
+ASPECT_RATIO_TO_SIZE = {
+    "3:4": "1024x1792",    # 竖版（默认）
+    "4:3": "1792x1024",    # 横版
+    "1:1": "1024x1024",    # 方形
+    "16:9": "1920x1080",   # 宽屏横版
+    "9:16": "1080x1920",   # 宽屏竖版
+    "21:9": "2048x878",    # 超宽屏
+    "9:21": "878x2048",    # 超长竖版
+}
+
 
 def encode_image_to_base64(image_path):
     with open(image_path, "rb") as f:
@@ -168,8 +180,10 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     }
 
     # 添加 size 参数（部分 API 支持）
+    # 将比例格式转换为像素格式，如 "3:4" -> "1024x1792"
     if aspect_ratio:
-        payload["size"] = aspect_ratio
+        pixel_size = ASPECT_RATIO_TO_SIZE.get(aspect_ratio, ASPECT_RATIO_TO_SIZE[DEFAULT_ASPECT_RATIO])
+        payload["size"] = pixel_size
 
     results = []
     last_error = None
