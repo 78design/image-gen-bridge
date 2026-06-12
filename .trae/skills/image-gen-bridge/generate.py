@@ -359,10 +359,13 @@ Examples:
   python generate.py --prompt "Style transfer" --image-file ref.jpg --output result.png
   python generate.py --prompt "Combine styles" --image-file a.jpg --image-file b.jpg --output combined.png
   python generate.py --prompt "A sunset" --timeout 300 --output sunset.png
+  python generate.py --prompt "A sunset" --backup-model "google/gemini-2.0-flash-preview" --output sunset.png
 
 Note:
   When using --number > 1, some API providers may not support
   multi-image generation and only return 1 image.
+
+  Use --backup-model to automatically switch if primary model fails.
 
 Environment Variables:
   IMAGE_GEN_API_KEY    Required
@@ -376,6 +379,7 @@ Environment Variables:
     parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
     parser.add_argument("--aspect-ratio", "--ratio", default="3:4", help="Image aspect ratio (default: 3:4, e.g., 1:1, 16:9, 9:16)")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT, help=f"Request timeout in seconds (default: {DEFAULT_TIMEOUT})")
+    parser.add_argument("--backup-model", help="Backup model to use if primary fails (e.g., google/gemini-2.0-flash-preview, google/gemini-pro)")
     parser.add_argument("--api-url", help="API URL")
     parser.add_argument("--api-key", help="API key")
     parser.add_argument("--model", help="Model name")
@@ -396,8 +400,19 @@ Environment Variables:
 
     print("Generating image...")
     print("  → Connecting to API...")
+
+    # 尝试主模型
     result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output,
                             args.number, args.aspect_ratio, args.timeout)
+
+    # 如果主模型失败且有备用模型，自动切换
+    if not result and args.backup_model:
+        print(f"\n{'='*60}")
+        print(f"Primary model failed, switching to backup model: {args.backup_model}")
+        print(f"{'='*60}\n")
+        result = generate_image(args.prompt, api_url, api_key, args.backup_model, args.image_file, args.output,
+                                args.number, args.aspect_ratio, args.timeout)
+
     sys.exit(0 if result else 1)
 
 
