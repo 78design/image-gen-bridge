@@ -4,7 +4,7 @@ AI图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.8.2
+v1.8.3
 
 ## 🚀 安装方法
 
@@ -44,13 +44,13 @@ bash install.sh
 
 ### 方法三：下载压缩包安装
 
-**点击直接下载：[image-gen-bridge-v1.8.2.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.2/image-gen-bridge-v1.8.2.zip)**
+**点击直接下载：[image-gen-bridge-v1.8.3.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.3/image-gen-bridge-v1.8.3.zip)**
 
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.2) 页面下载：
+或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.3) 页面下载：
 
 ```bash
 # 解压
-unzip image-gen-bridge-v1.8.2.zip
+unzip image-gen-bridge-v1.8.3.zip
 cd image-gen-bridge
 
 # 安装配置
@@ -121,6 +121,10 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--help` | ❌ | 显示帮助 |
 
 ## 🔄 更新日志
+
+### v1.8.3
+- ✨ 新增：客户端图片比例裁剪（gemini 模型生成 1:1 图后自动裁剪为目标比例）
+- 🔧 移除：`--number` 参数（多图生成功能），简化接口
 
 ### v1.8.2
 - 🔧 移除：`--number` 参数（多图生成功能），简化接口
