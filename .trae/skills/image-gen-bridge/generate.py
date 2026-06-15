@@ -69,7 +69,8 @@ def crop_image_to_ratio(image_path, target_ratio):
             img_width, img_height = img.size
             current_aspect = img_width / img_height
             
-            if abs(current_aspect - target_aspect) < 0.01:
+            if abs(current_aspect - target_aspect) < 0.05:
+                print(f"Aspect ratio already correct ({current_aspect:.2f} ≈ {target_aspect:.2f}), skipping crop")
                 return True
             
             if current_aspect > target_aspect:
@@ -409,7 +410,7 @@ Examples:
   python generate.py --prompt "Combine styles" --image-file a.jpg --image-file b.jpg --output combined.png
   python generate.py --prompt "A sunset" --timeout 300 --output sunset.png
   python generate.py --prompt "A sunset" --output sunset.png
-  (Automatically falls back to google/gemini-2.5-flash-image)
+  (Automatically falls back to google/gemini-3.1-flash-image-preview)
 
 Note:
   Use --backup-model to automatically switch if primary model fails.
@@ -425,7 +426,7 @@ Environment Variables:
     parser.add_argument("--output", help="Output file")
     parser.add_argument("--aspect-ratio", "--ratio", default="3:4", help="Image aspect ratio (default: 3:4, e.g., 1:1, 16:9, 9:16)")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT, help=f"Request timeout in seconds (default: {DEFAULT_TIMEOUT})")
-    parser.add_argument("--backup-model", default="google/gemini-2.5-flash-image", help="Backup model if primary fails (default: google/gemini-2.5-flash-image)")
+    parser.add_argument("--backup-model", default="google/gemini-3.1-flash-image-preview", help="Backup model if primary fails (default: google/gemini-3.1-flash-image-preview)")
     parser.add_argument("--api-url", help="API URL")
     parser.add_argument("--api-key", help="API key")
     parser.add_argument("--model", help="Model name")
