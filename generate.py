@@ -14,12 +14,6 @@ except ImportError:
     print("Error: requests library not installed. Run: pip install requests")
     sys.exit(1)
 
-try:
-    from PIL import Image
-except ImportError:
-    print("Warning: Pillow not installed, aspect ratio cropping will be skipped")
-    Image = None
-
 # 全局配置
 MAX_RETRIES = 2
 DEFAULT_TIMEOUT = 180
@@ -41,56 +35,6 @@ ASPECT_RATIO_TO_SIZE = {
 def encode_image_to_base64(image_path):
     with open(image_path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
-
-
-def aspect_ratio_to_dimensions(aspect_ratio):
-    """将比例转换为目标宽高（用于裁剪）"""
-    ratio_map = {
-        "3:4": (1024, 1792),
-        "4:3": (1792, 1024),
-        "1:1": (1024, 1024),
-        "16:9": (1920, 1080),
-        "9:16": (1080, 1920),
-        "21:9": (2048, 878),
-        "9:21": (878, 2048),
-    }
-    return ratio_map.get(aspect_ratio, (1024, 1792))
-
-
-def crop_image_to_ratio(image_path, target_ratio):
-    """居中裁剪图片到目标比例"""
-    if Image is None:
-        return True
-    
-    try:
-        with Image.open(image_path) as img:
-            target_width, target_height = aspect_ratio_to_dimensions(target_ratio)
-            target_aspect = target_width / target_height
-            img_width, img_height = img.size
-            current_aspect = img_width / img_height
-            
-            if abs(current_aspect - target_aspect) < 0.05:
-                print(f"Aspect ratio already correct ({current_aspect:.2f} ≈ {target_aspect:.2f}), skipping crop")
-                return True
-            
-            if current_aspect > target_aspect:
-                new_width = int(img_height * target_aspect)
-                new_height = img_height
-                left = (img_width - new_width) // 2
-                top = 0
-            else:
-                new_width = img_width
-                new_height = int(img_width / target_aspect)
-                left = 0
-                top = (img_height - new_height) // 2
-            
-            cropped_img = img.crop((left, top, left + new_width, top + new_height))
-            cropped_img.save(image_path)
-            print(f"Cropped to {target_ratio}: {new_width}x{new_height}")
-            return True
-    except Exception as e:
-        print(f"Cropping failed: {e}")
-        return True
 
 
 def download_image(url, output_path):
@@ -287,13 +231,11 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                             with open(output_path, "wb") as f:
                                 f.write(image_data)
                             print(f"Saved (base64): {output_path}")
-                            crop_image_to_ratio(output_path, aspect_ratio)
                             results.append(output_path)
                         else:
                             print(f"Image {idx+1} URL: {image_url}")
                             if download_image(image_url, output_path):
                                 print(f"Saved: {output_path}")
-                                crop_image_to_ratio(output_path, aspect_ratio)
                                 results.append(output_path)
                     else:
                         print(f"Image {idx+1} URL: {image_url}")
