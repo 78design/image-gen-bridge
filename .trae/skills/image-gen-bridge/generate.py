@@ -300,6 +300,7 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
 
                 if results:
                     print(f"\nSuccessfully generated {len(results)} image(s)")
+                    print(f"Model used: {model}")
                     return results if len(results) > 1 else results[0]
 
             # 没提取到图片，检查是否是"生成中"或错误
