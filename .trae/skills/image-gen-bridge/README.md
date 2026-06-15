@@ -4,7 +4,7 @@ AI图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.8.1
+v1.8.2
 
 ## 🚀 安装方法
 
@@ -44,13 +44,13 @@ bash install.sh
 
 ### 方法三：下载压缩包安装
 
-**点击直接下载：[image-gen-bridge-v1.8.1.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.1/image-gen-bridge-v1.8.1.zip)**
+**点击直接下载：[image-gen-bridge-v1.8.2.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.2/image-gen-bridge-v1.8.2.zip)**
 
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.1) 页面下载：
+或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.2) 页面下载：
 
 ```bash
 # 解压
-unzip image-gen-bridge-v1.8.1.zip
+unzip image-gen-bridge-v1.8.2.zip
 cd image-gen-bridge
 
 # 安装配置
@@ -74,12 +74,6 @@ python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "1:1" --outpu
 
 # 16:9 横版
 python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "16:9" --output cat.png
-```
-
-### 多图生成
-```bash
-# 生成 4 张图片
-python generate.py --prompt "一只可爱的猫咪" --number 4 --output cat.png
 ```
 
 ### 图生图（单张参考图）
@@ -120,7 +114,6 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--prompt` | ✅ | 图片描述 |
 | `--image-file` | ❌ | 参考图片路径（可多次使用） |
 | `--output` | ❌ | 输出文件路径 |
-| `--number` | ❌ | 生成图片数量（默认 1） |
 | `--aspect-ratio` | ❌ | 图片比例（默认 3:4，支持 1:1, 16:9, 9:16 等） |
 | `--api-url` | ❌ | 覆盖 API 地址 |
 | `--api-key` | ❌ | 覆盖 API Key |
@@ -128,6 +121,9 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--help` | ❌ | 显示帮助 |
 
 ## 🔄 更新日志
+
+### v1.8.2
+- 🔧 移除：`--number` 参数（多图生成功能），简化接口
 
 ### v1.8.1
 - 🔧 优化：备用模型默认只保留 `google/gemini-2.5-flash-image`
@@ -169,13 +165,10 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 - 🔧 优化：压缩包生成流程集成到 CI
 
 ### v1.2.0
-- ✨ 新增：支持多图生成（`--number` 参数）
 - ✨ 新增：支持图片比例参数（`--aspect-ratio`，默认 3:4）
 - 🔧 优化：安装脚本更健壮（支持 pip3、阿里云镜像、自动重试）
 
 ### v1.1.0
-- ✨ 新增：支持多图生成（`--number` 参数）
-- ✨ 新增：API Key 格式预检查
 - ✨ 新增：运行进度提示
 - ✨ 新增：VERSION 版本管理文件
 - ✨ 新增：支持图片比例参数（`--aspect-ratio`）

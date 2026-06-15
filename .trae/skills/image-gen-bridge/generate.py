@@ -139,7 +139,7 @@ def extract_error_detail(result):
 
 
 def generate_image(prompt, api_url, api_key, model, image_files=None, output_path=None,
-                   n=1, aspect_ratio=DEFAULT_ASPECT_RATIO, timeout=DEFAULT_TIMEOUT):
+                   aspect_ratio=DEFAULT_ASPECT_RATIO, timeout=DEFAULT_TIMEOUT):
     if not api_url.endswith("/chat/completions"):
         api_url = api_url.rstrip("/") + "/chat/completions"
 
@@ -171,12 +171,11 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     else:
         print("Mode: Text-to-Image")
 
-    print(f"Model: {model}\nAPI: {api_url}\nNumber of images: {n}\nAspect ratio: {aspect_ratio}\nTimeout: {timeout}s\nPrompt: {prompt_with_ratio[:80]}...")
+    print(f"Model: {model}\nAPI: {api_url}\nAspect ratio: {aspect_ratio}\nTimeout: {timeout}s\nPrompt: {prompt_with_ratio[:80]}...")
 
     payload = {
         "model": model,
-        "messages": messages,
-        "n": n
+        "messages": messages
     }
 
     # 添加 size 参数（部分 API 支持）
@@ -226,25 +225,18 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                     idx = img_info["index"]
 
                     if output_path:
-                        if n > 1:
-                            path_dir, path_base = os.path.split(output_path)
-                            path_name, path_ext = os.path.splitext(path_base)
-                            numbered_output = os.path.join(path_dir, f"{path_name}_{idx+1}{path_ext}")
-                        else:
-                            numbered_output = output_path
-
                         if image_url.startswith("data:image"):
                             b64_data = image_url.split(",", 1)[1]
                             image_data = base64.b64decode(b64_data)
-                            with open(numbered_output, "wb") as f:
+                            with open(output_path, "wb") as f:
                                 f.write(image_data)
-                            print(f"Saved (base64): {numbered_output}")
-                            results.append(numbered_output)
+                            print(f"Saved (base64): {output_path}")
+                            results.append(output_path)
                         else:
                             print(f"Image {idx+1} URL: {image_url}")
-                            if download_image(image_url, numbered_output):
-                                print(f"Saved: {numbered_output}")
-                                results.append(numbered_output)
+                            if download_image(image_url, output_path):
+                                print(f"Saved: {output_path}")
+                                results.append(output_path)
                     else:
                         print(f"Image {idx+1} URL: {image_url}")
                         results.append(image_url)
@@ -355,7 +347,6 @@ def main():
                                      epilog="""
 Examples:
   python generate.py --prompt "A cute cat" --output cat.png
-  python generate.py --prompt "A cute cat" --number 4 --output cat.png
   python generate.py --prompt "Style transfer" --image-file ref.jpg --output result.png
   python generate.py --prompt "Combine styles" --image-file a.jpg --image-file b.jpg --output combined.png
   python generate.py --prompt "A sunset" --timeout 300 --output sunset.png
@@ -363,9 +354,6 @@ Examples:
   (Automatically falls back to google/gemini-2.5-flash-image)
 
 Note:
-  When using --number > 1, some API providers may not support
-  multi-image generation and only return 1 image.
-
   Use --backup-model to automatically switch if primary model fails.
 
 Environment Variables:
@@ -377,7 +365,6 @@ Environment Variables:
     parser.add_argument("--prompt", required=True, help="Text prompt")
     parser.add_argument("--image-file", action="append", help="Reference image(s)")
     parser.add_argument("--output", help="Output file")
-    parser.add_argument("--number", "-n", type=int, default=1, help="Number of images to generate (default: 1)")
     parser.add_argument("--aspect-ratio", "--ratio", default="3:4", help="Image aspect ratio (default: 3:4, e.g., 1:1, 16:9, 9:16)")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT, help=f"Request timeout in seconds (default: {DEFAULT_TIMEOUT})")
     parser.add_argument("--backup-model", default="google/gemini-2.5-flash-image", help="Backup model if primary fails (default: google/gemini-2.5-flash-image)")
@@ -404,7 +391,7 @@ Environment Variables:
 
     # 尝试主模型
     result = generate_image(args.prompt, api_url, api_key, model, args.image_file, args.output,
-                            args.number, args.aspect_ratio, args.timeout)
+                            args.aspect_ratio, args.timeout)
 
     # 如果主模型失败且有备用模型，自动切换
     if not result and args.backup_model:
@@ -412,7 +399,7 @@ Environment Variables:
         print(f"Primary model failed, switching to backup model: {args.backup_model}")
         print(f"{'='*60}\n")
         result = generate_image(args.prompt, api_url, api_key, args.backup_model, args.image_file, args.output,
-                                args.number, args.aspect_ratio, args.timeout)
+                                args.aspect_ratio, args.timeout)
 
     sys.exit(0 if result else 1)
 
