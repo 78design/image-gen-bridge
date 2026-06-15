@@ -76,12 +76,6 @@ python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "1:1" --outpu
 python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "16:9" --output cat.png
 ```
 
-### 多图生成
-```bash
-# 生成 4 张图片
-python generate.py --prompt "一只可爱的猫咪" --number 4 --output cat.png
-```
-
 ### 图生图（单张参考图）
 ```bash
 python generate.py --prompt "把这只猫放在沙发上" --image-file cat.png --output cat_on_sofa.png
