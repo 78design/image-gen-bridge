@@ -22,19 +22,18 @@ echo ""
 rm -rf "$BUILD_DIR" "$PACKAGE_FILE"
 mkdir -p "$BUILD_DIR/$PACKAGE_NAME"
 
-# 复制核心文件
 cp "$SCRIPT_DIR/README.md" "$BUILD_DIR/$PACKAGE_NAME/"
 cp "$SCRIPT_DIR/SKILL.md" "$BUILD_DIR/$PACKAGE_NAME/"
-cp "$SCRIPT_DIR/generate.py" "$BUILD_DIR/$PACKAGE_NAME/"
-cp "$SCRIPT_DIR/requirements.txt" "$BUILD_DIR/$PACKAGE_NAME/"
 cp "$SCRIPT_DIR/VERSION" "$BUILD_DIR/$PACKAGE_NAME/"
+cp "$SCRIPT_DIR/LICENSE" "$BUILD_DIR/$PACKAGE_NAME/"
+mkdir -p "$BUILD_DIR/$PACKAGE_NAME/scripts"
+cp "$SCRIPT_DIR/scripts/generate.py" "$BUILD_DIR/$PACKAGE_NAME/scripts/"
+cp "$SCRIPT_DIR/scripts/requirements.txt" "$BUILD_DIR/$PACKAGE_NAME/scripts/"
 
-# 创建压缩包
 cd "$BUILD_DIR"
 zip -r "$PACKAGE_FILE" "$PACKAGE_NAME/" > /dev/null
 cd "$SCRIPT_DIR"
 
-# 清理
 rm -rf "$BUILD_DIR"
 
 echo "Built: $PACKAGE_FILE"

@@ -6,7 +6,7 @@ set -e
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <new_version>"
-    echo "Example: $0 1.8.2"
+    echo "Example: $0 1.9.0"
     exit 1
 fi
 
@@ -30,34 +30,26 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-echo "[1/5] Updating VERSION files..."
+echo "[1/4] Updating VERSION file..."
 echo "$NEW_VERSION" > VERSION
-echo "$NEW_VERSION" > .trae/skills/image-gen-bridge/VERSION
 echo "   Done."
 
 echo ""
-echo "[2/5] Updating README.md files..."
-for README in README.md .trae/skills/image-gen-bridge/README.md; do
-    sed -i "s/v$CURRENT_VERSION/v$NEW_VERSION/g" "$README"
-    sed -i "s/image-gen-bridge-v$CURRENT_VERSION/image-gen-bridge-v$NEW_VERSION/g" "$README"
+echo "[2/4] Updating README.md and SKILL.md..."
+for FILE in README.md SKILL.md; do
+    sed -i "s/v$CURRENT_VERSION/v$NEW_VERSION/g" "$FILE"
+    sed -i "s/image-gen-bridge-v$CURRENT_VERSION/image-gen-bridge-v$NEW_VERSION/g" "$FILE"
 done
 echo "   Done."
 
 echo ""
-echo "[3/5] Updating CHANGELOG..."
-for README in README.md .trae/skills/image-gen-bridge/README.md; do
-    sed -i "/^### v$CURRENT_VERSION$/c\### v$NEW_VERSION\n- 🚀 Release v$NEW_VERSION" "$README"
-done
-echo "   Done."
-
-echo ""
-echo "[4/5] Committing changes..."
+echo "[3/4] Committing changes..."
 git add .
 git commit -m "chore: bump version to v$NEW_VERSION"
 echo "   Done."
 
 echo ""
-echo "[5/5] Creating and pushing tag..."
+echo "[4/4] Creating and pushing tag..."
 git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
 git push origin HEAD
 git push origin "v$NEW_VERSION"
@@ -68,8 +60,7 @@ echo "========================================="
 echo "  Release v$NEW_VERSION completed!"
 echo "========================================="
 echo ""
-echo "Changes:"
-echo "  - VERSION: $CURRENT_VERSION -> $NEW_VERSION"
-echo "  - README.md: Updated version references"
-echo "  - Git tag: v$NEW_VERSION"
+echo "Next steps:"
+echo "  1. Run ./build.sh to generate release zip"
+echo "  2. Upload zip to GitHub Release page"
 echo ""

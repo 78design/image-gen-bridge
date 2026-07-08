@@ -13,5 +13,13 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Build artifacts
+*.zip
+*.tar.gz
+
 # Test/Debug
 *.log
+*.png
+*.jpg
+*.jpeg
+*.gif
