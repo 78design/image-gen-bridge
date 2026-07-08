@@ -4,7 +4,7 @@ AI 图片生成工具，支持文生图和图生图。符合 SKILL.md 规范的�
 
 ## 📦 当前版本
 
-v1.9.0
+v1.9.1
 
 ## 🚀 安装方法
 
@@ -28,7 +28,7 @@ pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simpl
 
 ### 方法三：下载压缩包
 
-[GitHub Releases v1.9.0](https://github.com/78design/image-gen-bridge/releases/tag/v1.9.0)
+[GitHub Releases v1.9.1](https://github.com/78design/image-gen-bridge/releases/tag/v1.9.1)
 
 ## 🔧 配置
 
@@ -95,9 +95,15 @@ image-gen-bridge/
 | `--api-key` | ❌ | 覆盖 API Key |
 | `--model` | ❌ | 覆盖模型名称 |
 | `--backup-model` | ❌ | 备用模型（默认 google/gemini-3.1-flash-image-preview） |
-| `--timeout` | ❌ | 请求超时时间（默认 180s） |
 
 ## 🔄 更新日志
+
+### v1.9.1
+- 🔧 核心优化：移除请求超时限制（timeout=None）
+- 🔧 核心优化：删除内部重试逻辑，接口返回什么就直接展示
+- 🔧 核心优化：删除模糊判断（"生成中"等关键词），避免误判
+- ✨ 透传原始响应：接口返回错误时完整展示 API 响应内容
+- 🔧 参数调整：移除 --timeout CLI 参数
 
 ### v1.9.0
 - 🔧 重构：按 SKILL.md 规范调整目录结构

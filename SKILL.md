@@ -4,7 +4,7 @@ description: "AI 图片生成能力：支持文生图、图生图、多参考图
 license: MIT
 metadata:
   author: 78design
-  version: "1.9.0"
+  version: "1.9.1"
 tags:
   - image-generation
   - text-to-image
