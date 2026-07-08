@@ -1,19 +1,18 @@
 ---
 name: image-gen-bridge
-description: AI图片生成工具，支持文生图和图生图
+description: AI 图片生成工具，支持文生图和图生图
 ---
 
 # image-gen-bridge
 
-支持文生图和图生图（支持多张参考图）。
+AI 图片生成工具，支持文生图和图生图（支持多张参考图）。
 
 ## Usage
 
 ```bash
 # Install
-git clone https://github.com/78design/image-gen-bridge.git
-cd image-gen-bridge
-bash install.sh
+npx skilldirs add 78design/image-gen-bridge --yes --copy
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
 # Generate
 python generate.py --prompt "描述" --output image.png
@@ -40,6 +39,9 @@ python generate.py --prompt "描述" --image-file a.jpg --image-file b.jpg --out
 | --prompt | Yes | Text prompt |
 | --image-file | No | Reference image (multiple allowed) |
 | --output | No | Output file path |
+| --aspect-ratio | No | Aspect ratio (default: 3:4) |
 | --api-url | No | Override API URL |
 | --api-key | No | Override API key |
 | --model | No | Override model |
+| --backup-model | No | Backup model (default: google/gemini-3.1-flash-image-preview) |
+| --timeout | No | Request timeout in seconds (default: 180) |

@@ -1,16 +1,14 @@
-# 🖼️ image-gen-bridge
+# image-gen-bridge
 
-AI图片生成工具，支持文生图和图生图。
+AI 图片生成工具，支持文生图和图生图。
 
 ## 📦 当前版本
 
-v1.8.5
+v1.8.6
 
 ## 🚀 安装方法
 
 ### 方法一：使用 skilldirs 一键安装（推荐）
-
-在终端运行：
 
 ```bash
 npx skilldirs add 78design/image-gen-bridge --yes --copy
@@ -18,53 +16,43 @@ npx skilldirs add 78design/image-gen-bridge --yes --copy
 
 > ✅ 支持所有主流 AI Agent：Trae、Cursor、Claude Code、OpenCode 等
 
-安装后进入目录配置：
+### 方法二：Git 克隆
 
 ```bash
-cd skills/image-gen-bridge
-bash install.sh
-```
-
-按照提示选择 API Provider，输入 API Key 即可。
-
----
-
-### 方法二：Git 克隆安装
-
-```bash
-# 克隆仓库
 git clone https://github.com/78design/image-gen-bridge.git
 cd image-gen-bridge
-
-# 安装配置
-bash install.sh
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
----
+### 方法三：下载压缩包
 
-### 方法三：下载压缩包安装
-
-**点击直接下载：[image-gen-bridge-v1.8.5.zip](https://github.com/78design/image-gen-bridge/releases/download/v1.8.5/image-gen-bridge-v1.8.5.zip)**
-
-或从 [GitHub Releases](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.5) 页面下载：
+[GitHub Releases v1.8.6](https://github.com/78design/image-gen-bridge/releases/tag/v1.8.6) 页面下载 `image-gen-bridge-v1.8.6.zip`，解压后：
 
 ```bash
-# 解压
-unzip image-gen-bridge-v1.8.5.zip
 cd image-gen-bridge
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+```
 
-# 安装配置
-bash install.sh
+## 🔧 手动配置
+
+设置环境变量：
+
+```bash
+export IMAGE_GEN_API_KEY="你的API密钥"
+export IMAGE_GEN_API_URL="https://api.1openapi.com/v1"
+export IMAGE_GEN_MODEL="openai/gpt-image-2"
 ```
 
 ## 📸 使用方法
 
 ### 文生图
+
 ```bash
 python generate.py --prompt "一只可爱的猫咪" --output cat.png
 ```
 
 ### 指定比例
+
 ```bash
 # 3:4 竖版（默认）
 python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "3:4" --output cat.png
@@ -76,13 +64,13 @@ python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "1:1" --outpu
 python generate.py --prompt "一只可爱的猫咪" --aspect-ratio "16:9" --output cat.png
 ```
 
-### 图生图（单张参考图）
-```bash
-python generate.py --prompt "把这只猫放在沙发上" --image-file cat.png --output cat_on_sofa.png
-```
+### 图生图
 
-### 图生图（多张参考图）
 ```bash
+# 单张参考图
+python generate.py --prompt "把这只猫放在沙发上" --image-file cat.png --output result.png
+
+# 多张参考图
 python generate.py --prompt "结合两张参考图的风格" --image-file style1.png --image-file style2.png --output result.png
 ```
 
@@ -92,20 +80,6 @@ python generate.py --prompt "结合两张参考图的风格" --image-file style1
 |----------|-----------|------|
 | 1OpenAPI ⭐ | api.1openapi.com/v1 | openai/gpt-image-2, google/gemini-3.1-flash-image-preview |
 | Custom | 自定义 | 自定义 |
-
-## 🔧 手动配置
-
-如果不用安装向导，可以手动设置环境变量：
-
-```bash
-export IMAGE_GEN_API_KEY="你的API密钥"
-export IMAGE_GEN_API_URL="https://api.1openapi.com/v1"
-export IMAGE_GEN_MODEL="openai/gpt-image-2"
-```
-
-## 📦 获取 API Key
-
-推荐使用 [1OpenAPI](https://www.1openapi.com)，性价比高，支持 GPT Image 模型。
 
 ## 📖 完整参数说明
 
@@ -118,80 +92,21 @@ export IMAGE_GEN_MODEL="openai/gpt-image-2"
 | `--api-url` | ❌ | 覆盖 API 地址 |
 | `--api-key` | ❌ | 覆盖 API Key |
 | `--model` | ❌ | 覆盖模型名称 |
+| `--backup-model` | ❌ | 备用模型（默认 google/gemini-3.1-flash-image-preview） |
+| `--timeout` | ❌ | 请求超时时间（默认 180s） |
 | `--help` | ❌ | 显示帮助 |
 
 ## 🔄 更新日志
+
+### v1.8.6
+- 🔧 重构：仓库目录结构，移除 `.trae/` 子目录
+- 🔧 重构：移除 `install.sh`，统一使用 `npx skilldirs` 一键安装
+- ✨ 新增：`build.sh` 脚本，一键构建发布压缩包
 
 ### v1.8.5
 - 🔧 优化：备用模型改为 `google/gemini-3.1-flash-image-preview`（支持比例参数）
 - 🔧 移除：裁剪代码（Gemini 3.1 已能正确生成目标比例）
 - ✨ 新增：输出显示使用的模型名称
-
-### v1.8.4
-- ✨ 新增：输出显示使用的模型名称
-- ✨ 新增：客户端图片比例裁剪
-
-### v1.8.3
-- ✨ 新增：客户端图片比例裁剪（gemini 模型生成 1:1 图后自动裁剪为目标比例）
-- 🔧 移除：`--number` 参数（多图生成功能），简化接口
-
-### v1.8.2
-- 🔧 移除：`--number` 参数（多图生成功能），简化接口
-
-### v1.8.1
-- 🔧 优化：备用模型默认只保留 `google/gemini-3.1-flash-image-preview`
-
-### v1.8.0
-- ✨ 新增：备用模型功能（`--backup-model`），主模型失败自动切换
-- ✨ 新增：增强错误信息输出，完整显示 API 原始响应
-- ✨ 新增：超时/连接错误专门处理和提示
-- 🐛 修复：size 参数格式转换为像素格式
-
-### v1.7.0
-- 🐛 修复：size 参数格式错误，将比例格式转换为像素格式（如 "3:4" → "1024x1792"）
-- ✨ 新增：支持多种比例映射（3:4, 4:3, 1:1, 16:9, 9:16, 21:9, 9:21）
-
-### v1.6.0
-- 🐛 修复：先提取图片再检查"生成中"，避免误判丢弃有效图片
-- ✨ 新增：aspect-ratio 同时支持 payload size 参数和 prompt 文本两种方式
-- ✨ 新增：自动重试机制（最多2次）
-- ✨ 新增：原始 API 错误信息输出
-- ✨ 新增：多格式图片解析（Markdown/Gemini/b64_json）
-- ✨ 新增：`--timeout` 参数可配置超时时间（默认180s）
-
-### v1.5.0
-- ✨ 新增：自动重试机制（最多2次），避免无限扣费
-- ✨ 新增：原始 API 错误信息输出（4xx/5xx/body字段）
-- ✨ 新增：多格式图片解析（Markdown/Gemini images/b64_json/数组）
-- ✨ 新增：识别"生成中"等无效响应并自动重试
-- ✨ 新增：`--timeout` 参数可配置超时时间（默认180s）
-- 🔧 修复：`--aspect-ratio` 参数改为拼入 prompt 文本
-- 🔧 优化：默认 API 地址统一为 `https://api.1openapi.com/v1`
-- 🔧 优化：默认模型统一为 `openai/gpt-image-2`
-
-### v1.4.0
-- 🔧 修复：aspect-ratio 参数改为拼入 prompt
-
-### v1.3.0
-- ✨ 新增：GitHub Actions 自动化发布流程
-- ✨ 新增：release.sh 一键版本发布脚本
-- 🔧 优化：压缩包生成流程集成到 CI
-
-### v1.2.0
-- ✨ 新增：支持图片比例参数（`--aspect-ratio`，默认 3:4）
-- 🔧 优化：安装脚本更健壮（支持 pip3、阿里云镜像、自动重试）
-
-### v1.1.0
-- ✨ 新增：运行进度提示
-- ✨ 新增：VERSION 版本管理文件
-- ✨ 新增：支持图片比例参数（`--aspect-ratio`）
-- 🔧 优化：安装脚本更健壮（支持 pip3、阿里云镜像、自动重试）
-- 🔧 优化：添加 UTF-8 编码声明
-- 🔧 优化：修复 OpenSSL 兼容警告
-- 🔧 优化：优化依赖管理
-
-### v1.0.0
-- 🎉 初始版本发布
 
 ## License
 
