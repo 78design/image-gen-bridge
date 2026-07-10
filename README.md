@@ -12,18 +12,19 @@ v1.9.1
 
 ```bash
 npx skilldirs add 78design/image-gen-bridge --yes --copy
-cd image-gen-bridge
-pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+cd ~/.trae-cn/skills/image-gen-bridge
+python3 -m pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --break-system-packages
 ```
 
 > ✅ 支持所有主流 AI Agent：Trae、Cursor、Claude Code、OpenCode 等
+> ⚠️ `--break-system-packages` 用于绕过 macOS/Linux 系统 Python 的 PEP 668 限制
 
 ### 方法二：Git 克隆
 
 ```bash
 git clone https://github.com/78design/image-gen-bridge.git
 cd image-gen-bridge
-pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+python3 -m pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --break-system-packages
 ```
 
 ### 方法三：下载压缩包
