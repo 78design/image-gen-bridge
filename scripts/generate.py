@@ -18,7 +18,11 @@ import sys
 try:
     import requests
 except ImportError:
-    print("Error: requests library not installed. Run: pip install requests")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    req_path = os.path.join(script_dir, "requirements.txt")
+    print("Error: requests library not installed.")
+    print(f"Please run: pip install -r {req_path} -i https://mirrors.aliyun.com/pypi/simple/")
+    print("If you get PEP 668 error on macOS/Linux, add: --break-system-packages")
     sys.exit(1)
 
 # 全局配置

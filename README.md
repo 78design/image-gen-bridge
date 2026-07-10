@@ -6,41 +6,20 @@ AI 图片生成工具，支持文生图和图生图。符合 SKILL.md 规范的�
 
 v1.9.1
 
-## 🚀 安装方法
-
-### 方法一：Git 克隆（所有 Agent 通用）
-
-```bash
-git clone https://github.com/78design/image-gen-bridge.git
-cd image-gen-bridge
-```
-
-**方案 A：使用虚拟环境（推荐）**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
-```
-
-**方案 B：直接安装到当前 Python 环境**
-```bash
-pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
-```
-
-> ✅ 支持所有主流 AI Agent：Trae、Cursor、Claude Code、OpenCode 等
-> 💡 macOS/Linux 用户若遇到 PEP 668 限制，可加 `--break-system-packages` 参数
-
-### 方法二：使用 skilldirs 一键安装（仅 TRAE）
+## 🚀 安装
 
 ```bash
 npx skilldirs add 78design/image-gen-bridge --yes --copy
-cd ~/.trae-cn/skills/image-gen-bridge
+```
+
+安装完成后，进入技能目录安装 Python 依赖：
+
+```bash
 pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
-### 方法三：下载压缩包
-
-[GitHub Releases v1.9.1](https://github.com/78design/image-gen-bridge/releases/tag/v1.9.1)
+> ✅ 支持 Trae、Cursor、Claude Code、OpenCode 等所有主流 AI Agent
+> 💡 macOS/Linux 若遇到 PEP 668 限制，加 `--break-system-packages` 参数
 
 ## 🔧 配置
 
