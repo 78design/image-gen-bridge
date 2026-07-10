@@ -13,21 +13,39 @@ v1.9.1
 ```bash
 npx skilldirs add 78design/image-gen-bridge --yes --copy
 cd ~/.trae-cn/skills/image-gen-bridge
+```
+
+**方案 A：使用虚拟环境（推荐）**
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
+**方案 B：直接安装到当前 Python 环境**
+```bash
+pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+```
+
 > ✅ 支持所有主流 AI Agent：Trae、Cursor、Claude Code、OpenCode 等
-> 💡 使用虚拟环境安装，干净隔离，避免系统 Python 冲突
+> 💡 macOS/Linux 用户若遇到 PEP 668 限制，可加 `--break-system-packages` 参数
 
 ### 方法二：Git 克隆
 
 ```bash
 git clone https://github.com/78design/image-gen-bridge.git
 cd image-gen-bridge
+```
+
+**方案 A：使用虚拟环境（推荐）**
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+```
+
+**方案 B：直接安装到当前 Python 环境**
+```bash
 pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
