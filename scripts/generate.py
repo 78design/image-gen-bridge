@@ -167,9 +167,17 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
     messages = [{"role": "user", "content": [{"type": "text", "text": prompt_with_ratio}]}]
 
     if image_files and len(image_files) > 0:
-        valid_images = [f for f in image_files if os.path.exists(f)]
-        if valid_images:
-            print(f"Mode: Image-to-Image (refs: {', '.join(valid_images)})")
+        valid_images = []
+        url_images = []
+        for img in image_files:
+            if img.startswith("http://") or img.startswith("https://"):
+                url_images.append(img)
+            elif os.path.exists(img):
+                valid_images.append(img)
+        
+        all_refs = valid_images + url_images
+        if all_refs:
+            print(f"Mode: Image-to-Image (refs: {', '.join(all_refs)})")
             for image_file in valid_images:
                 img_base64 = encode_image_to_base64(image_file)
                 ext = os.path.splitext(image_file)[1].lower()
@@ -177,6 +185,11 @@ def generate_image(prompt, api_url, api_key, model, image_files=None, output_pat
                 messages[0]["content"].append({
                     "type": "image_url",
                     "image_url": {"url": f"data:{mime};base64,{img_base64}"}
+                })
+            for img_url in url_images:
+                messages[0]["content"].append({
+                    "type": "image_url",
+                    "image_url": {"url": img_url}
                 })
         else:
             print("Warning: No valid reference images, using text-to-image mode")

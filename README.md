@@ -4,7 +4,7 @@ AI 图片生成工具，支持文生图和图生图。符合 SKILL.md 规范的�
 
 ## 📦 当前版本
 
-v1.9.1
+v1.9.2
 
 ## 🚀 安装
 
@@ -49,14 +49,21 @@ python scripts/generate.py --prompt "一只可爱的猫咪" --aspect-ratio "3:4"
 
 ### 图生图
 
+**本地文件：**
 ```bash
 python scripts/generate.py --prompt "把这只猫放在沙发上" --image-file cat.png --output result.png
 ```
 
+**URL 链接：**
+```bash
+python scripts/generate.py --prompt "把这只猫变成卡通风格" --image-file "https://example.com/cat.jpg" --output result.png
+```
+
 ### 多张参考图
 
+本地文件和 URL 可混用：
 ```bash
-python scripts/generate.py --prompt "结合两张参考图" --image-file a.jpg --image-file b.jpg --output result.png
+python scripts/generate.py --prompt "结合两张参考图" --image-file a.jpg --image-file "https://example.com/b.png" --output result.png
 ```
 
 ## 📂 目录结构
@@ -79,7 +86,7 @@ image-gen-bridge/
 | 参数 | 必需 | 说明 |
 |------|------|------|
 | `--prompt` | ✅ | 图片描述 |
-| `--image-file` | ❌ | 参考图片路径（可多次使用） |
+| `--image-file` | ❌ | 参考图片（支持本地路径或 http/https URL，可多次使用） |
 | `--output` | ❌ | 输出文件路径 |
 | `--aspect-ratio` | ❌ | 图片比例（默认 3:4） |
 | `--api-url` | ❌ | 覆盖 API 地址 |
@@ -88,6 +95,11 @@ image-gen-bridge/
 | `--backup-model` | ❌ | 备用模型（默认 google/gemini-3.1-flash-image-preview） |
 
 ## 🔄 更新日志
+
+### v1.9.2
+- ✨ 新增：--image-file 参数支持 http/https URL 链接作为参考图
+- ✨ 支持本地文件和 URL 混用（多参考图场景）
+- 🔧 优化：依赖缺失时自动输出 requirements.txt 的绝对路径
 
 ### v1.9.1
 - 🔧 核心优化：移除请求超时限制（timeout=None）

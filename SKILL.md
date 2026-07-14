@@ -4,7 +4,7 @@ description: "AI 图片生成能力：支持文生图、图生图、多参考图
 license: MIT
 metadata:
   author: 78design
-  version: "1.9.1"
+  version: "1.9.2"
 tags:
   - image-generation
   - text-to-image
@@ -71,14 +71,20 @@ python scripts/generate.py --prompt "描述" --aspect-ratio "3:4" --output out.p
 
 ### 图生图（单张参考）
 
+本地文件：
 ```bash
 python scripts/generate.py --prompt "描述" --image-file ref.jpg --output out.png
 ```
 
-### 图生图（多张参考）
+URL 链接：
+```bash
+python scripts/generate.py --prompt "描述" --image-file "https://example.com/ref.jpg" --output out.png
+```
+
+### 图生图（多张参考，本地文件和 URL 可混用）
 
 ```bash
-python scripts/generate.py --prompt "描述" --image-file a.jpg --image-file b.jpg --output out.png
+python scripts/generate.py --prompt "描述" --image-file a.jpg --image-file "https://example.com/b.png" --output out.png
 ```
 
 ### 指定 API 参数
@@ -92,7 +98,7 @@ python scripts/generate.py --prompt "描述" --model "google/gemini-3.1-flash-im
 | 参数 | 必需 | 说明 |
 |------|------|------|
 | `--prompt` | ✅ | 图片描述文字 |
-| `--image-file` | ❌ | 参考图片路径，可多次指定 |
+| `--image-file` | ❌ | 参考图片（本地路径或 http/https URL），可多次指定 |
 | `--output` | ❌ | 输出文件路径，默认 `generated_<时间戳>.png` |
 | `--aspect-ratio` | ❌ | 图片比例，默认 `3:4` |
 | `--api-url` | ❌ | 覆盖 API 地址 |
