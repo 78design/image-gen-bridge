@@ -100,6 +100,7 @@ image-gen-bridge/
 - ✨ 新增：--image-file 参数支持 http/https URL 链接作为参考图
 - ✨ 支持本地文件和 URL 混用（多参考图场景）
 - 🔧 优化：依赖缺失时自动输出 requirements.txt 的绝对路径
+- 🔧 优化：安装方法统一使用 npx skilldirs，简化文档
 
 ### v1.9.1
 - 🔧 核心优化：移除请求超时限制（timeout=None）
