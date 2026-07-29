@@ -4,7 +4,7 @@ AI 图片生成工具，支持文生图和图生图。符合 SKILL.md 规范的�
 
 ## 📦 当前版本
 
-v1.9.2
+v1.9.3
 
 ## 🚀 安装
 
@@ -27,7 +27,7 @@ pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simpl
 
 ```bash
 export IMAGE_GEN_API_KEY="你的API密钥"
-export IMAGE_GEN_API_URL="https://api.1openapi.com/v1"
+export IMAGE_GEN_API_URL="https://api.1openrouter.ai/v1"
 export IMAGE_GEN_MODEL="openai/gpt-image-2"
 ```
 
@@ -95,6 +95,9 @@ image-gen-bridge/
 | `--backup-model` | ❌ | 备用模型（默认 google/gemini-3.1-flash-image-preview） |
 
 ## 🔄 更新日志
+
+### v1.9.3
+- 🔧 更新：默认 API 地址改为 https://api.1openrouter.ai/v1
 
 ### v1.9.2
 - ✨ 新增：--image-file 参数支持 http/https URL 链接作为参考图

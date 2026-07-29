@@ -4,7 +4,7 @@ description: "AI 图片生成能力：支持文生图、图生图、多参考图
 license: MIT
 metadata:
   author: 78design
-  version: "1.9.2"
+  version: "1.9.3"
 tags:
   - image-generation
   - text-to-image
@@ -52,7 +52,7 @@ pip install -r scripts/requirements.txt -i https://mirrors.aliyun.com/pypi/simpl
 | 变量 | 必填 | 默认值 |
 |------|------|--------|
 | `IMAGE_GEN_API_KEY` | 是 | - |
-| `IMAGE_GEN_API_URL` | 否 | `https://api.1openapi.com/v1` |
+| `IMAGE_GEN_API_URL` | 否 | `https://api.1openrouter.ai/v1` |
 | `IMAGE_GEN_MODEL` | 否 | `openai/gpt-image-2` |
 
 ### 文生图
